@@ -121,13 +121,17 @@
           </div>
         </div>
       </section>
+      <% if(locals.errors){%>
       <div class="lg:flex-[1] flex justify-center">
-        <ul class="flex flex-col justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-          <% if(locals.errors){ locals.errors.forEach(({msg}) => {%>
+        <ul
+          class="flex flex-col justify-center px-6 py-8 mx-auto md:h-screen lg:py-0"
+        >
+          <%locals.errors.forEach(({msg}) => {%>
           <li class="mt-0 m-0 text-red-400 list-disc"><%=msg%></li>
-          <%}) } %>
+          <%})%>
         </ul>
       </div>
+      <%}%>
     </div>
   </body>
 </html>

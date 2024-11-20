@@ -3,5 +3,5 @@ const getIndexPage = (req, res) => {
 };
 
 module.exports = {
-    getIndexPage
-}
+  getIndexPage,
+};

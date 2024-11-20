@@ -1,10 +1,19 @@
 const { body, validationResult } = require('express-validator');
-const { insertUser, userExists } = require('../db/queries/userQueries');
+const {
+  insertUser,
+  userExists,
+  findUser,
+  findUserById,
+} = require('../db/queries/userQueries');
 const bcrypt = require('bcryptjs');
 const util = require('util');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 
 const hashAsync = util.promisify(bcrypt.hash);
+const compareAsync = util.promisify(bcrypt.compare);
 
+//Sign up logic starts here
 const getSingupPage = (req, res) => {
   res.render('signup');
 };
@@ -70,7 +79,67 @@ const signUpFormSchema = [
     .withMessage('confirm password not provided'),
 ];
 
+//Login logic starts here
+
+const postLogin = passport.authenticate('local', {
+  failureRedirect: '/login',
+  successRedirect: '/',
+});
+
+const getLoginPage = (req, res) => {
+  res.render('login');
+};
+
+passport.use(
+  new LocalStrategy(
+    {
+      passwordField: 'password',
+      usernameField: 'email',
+    },
+    async (email, password, done) => {
+      try {
+        const user = await findUser(email);
+
+        if (!user) {
+          done(false, null, { message: 'User does not exist' });
+          return;
+        }
+
+        const match = await compareAsync(password, user.password);
+        if (!match) {
+          done(false, null, { message: 'Incorrect password' });
+          return;
+        }
+
+        done(false, user);
+      } catch (e) {
+        done(e);
+      }
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(false, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await findUserById(id);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    done(false, user);
+  } catch (e) {
+    done(e);
+  }
+});
+
 module.exports = {
   getSingupPage,
-  postSignUpPage: [signUpFormSchema, postSignUpPage],
+  postSignUp: [signUpFormSchema, postSignUpPage],
+  postLogin,
+  getLoginPage
 };
