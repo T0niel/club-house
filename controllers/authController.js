@@ -1,16 +1,32 @@
 const { body, validationResult } = require('express-validator');
+const { insertUser, userExists } = require('../db/queries/userQueries');
+const bcrypt = require('bcryptjs');
+const util = require('util');
+
+const hashAsync = util.promisify(bcrypt.hash);
 
 const getSingupPage = (req, res) => {
   res.render('signup');
 };
 
-const postSignUpPage = (req, res) => {
+const postSignUpPage = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.render('signup', { errors: errors.array() });
     return;
   }
 
+  const { first_name, last_name, email, password } = req.body;
+
+  const exists = await userExists(email);
+  if (exists) {
+    res.render('signup', { errors: [{ msg: 'User with this email exists' }] });
+    return;
+  }
+
+  const hashedPassword = await hashAsync(password, 10);
+
+  await insertUser(first_name, last_name, email, hashedPassword);
   res.redirect('/');
 };
 
@@ -56,5 +72,5 @@ const signUpFormSchema = [
 
 module.exports = {
   getSingupPage,
-  postSignUpPage: [signUpFormSchema, postSignUpPage]
+  postSignUpPage: [signUpFormSchema, postSignUpPage],
 };

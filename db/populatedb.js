@@ -17,7 +17,7 @@ CREATE TABLE
         id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
-        email VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         user_role_id BIGINT,
         FOREIGN KEY (user_role_id) REFERENCES user_roles (id)
@@ -53,7 +53,15 @@ CREATE TABLE
         club_id BIGINT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users (id),
         FOREIGN KEY (club_id) REFERENCES clubs (id)
-    );`;
+    );
+ 
+INSERT INTO
+    user_roles (
+        role_name
+    )
+VALUES
+    ('admin'),
+    ('user')`;
 
 async function main() {
   console.log('Seeding...');
