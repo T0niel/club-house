@@ -81,10 +81,28 @@ const signUpFormSchema = [
 
 //Login logic starts here
 
-const postLogin = passport.authenticate('local', {
-  failureRedirect: '/login',
-  successRedirect: '/',
-});
+const postLogin = (req, res, next) => {
+  passport.authenticate('local', (err, user) => {
+    if (err) {
+      res.render('login', {
+        errors: [{ msg: 'An error happened while login you in' }],
+      });
+      return;
+    }
+
+    if (!user) {
+      res.render('login', { errors: [{ msg: 'Incorrect email or password' }] });
+      return;
+    }
+
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err); // Handle any error during the login process
+      }
+      return res.redirect('/'); // Redirect to the home page on success
+    });
+  })(req, res, next);
+};
 
 const getLoginPage = (req, res) => {
   res.render('login');
@@ -101,13 +119,13 @@ passport.use(
         const user = await findUser(email);
 
         if (!user) {
-          done(false, null, { message: 'User does not exist' });
+          done(false, null);
           return;
         }
 
         const match = await compareAsync(password, user.password);
         if (!match) {
-          done(false, null, { message: 'Incorrect password' });
+          done(false, null);
           return;
         }
 
@@ -141,5 +159,5 @@ module.exports = {
   getSingupPage,
   postSignUp: [signUpFormSchema, postSignUpPage],
   postLogin,
-  getLoginPage
+  getLoginPage,
 };

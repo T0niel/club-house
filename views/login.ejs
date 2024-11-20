@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/output.css" />
-    
+
     <title>Login</title>
   </head>
   <body>
@@ -71,6 +71,13 @@
                   >Signup here</a
                 >
               </p>
+              <% if(locals.errors){%>
+              <ul class="flex flex-col items-center">
+                <%locals.errors.forEach(({msg}) => {%>
+                <li class="mt-0 m-0 text-red-400 list-disc"><%=msg%></li>
+                <%})%>
+              </ul>
+              <%}%>
             </form>
           </div>
         </div>
