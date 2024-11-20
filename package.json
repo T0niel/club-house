@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
-    "run": "node app.js" 
+    "run": "node app.js"
   },
   "author": "elton <elton.rexha123@example.com>",
   "license": "MIT",
@@ -15,7 +15,8 @@
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "passport": "^0.7.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
