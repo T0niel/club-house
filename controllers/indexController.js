@@ -1,5 +1,11 @@
 const getIndexPage = (req, res) => {
-  res.render('index');
+  if (req.isAuthenticated()) {
+    res.render('homepage');
+    return;
+  }
+
+  res.render('getStarted');
+
 };
 
 module.exports = {

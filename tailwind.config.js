@@ -2,7 +2,26 @@
 module.exports = {
   content: ['./views/**/*.ejs'],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'index-background': "url('/images/index-layer.svg')",
+      },
+      animation: {
+        'slide-bottom': 'slide-bottom-keyframe 800ms ease-in-out',
+      },
+      keyframes: {
+        'slide-bottom-keyframe': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(-20%)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0px)',
+          },
+        },
+      },
+    },
   },
   plugins: [],
 };

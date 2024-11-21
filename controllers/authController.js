@@ -18,26 +18,34 @@ const getSingupPage = (req, res) => {
   res.render('signup');
 };
 
-const postSignUpPage = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.render('signup', { errors: errors.array() });
-    return;
-  }
+const postSignUpPage = [
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.render('signup', { errors: errors.array() });
+      return;
+    }
 
-  const { first_name, last_name, email, password } = req.body;
+    const { first_name, last_name, email, password } = req.body;
 
-  const exists = await userExists(email);
-  if (exists) {
-    res.render('signup', { errors: [{ msg: 'User with this email exists' }] });
-    return;
-  }
+    const exists = await userExists(email);
+    if (exists) {
+      res.render('signup', {
+        errors: [{ msg: 'User with this email exists' }],
+      });
+      return;
+    }
 
-  const hashedPassword = await hashAsync(password, 10);
+    const hashedPassword = await hashAsync(password, 10);
 
-  await insertUser(first_name, last_name, email, hashedPassword);
-  res.redirect('/');
-};
+    await insertUser(first_name, last_name, email, hashedPassword);
+    next();
+  },
+  passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/',
+  }),
+];
 
 const signUpFormSchema = [
   body('email')
@@ -155,9 +163,22 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+//logout logic
+
+const postLogout = (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+
+    res.redirect('/');
+  });
+};
+
 module.exports = {
   getSingupPage,
   postSignUp: [signUpFormSchema, postSignUpPage],
   postLogin,
   getLoginPage,
+  postLogout,
 };
