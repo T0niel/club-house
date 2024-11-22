@@ -1,6 +1,6 @@
-class HttpError extends Error{
-    constructor(msg, httpType){
-        super(msg);
-        this.httpType = httpType;
-    }
+module.exports = class HttpError extends Error {
+  constructor(msg, httpCode) {
+    super(msg);
+    this.httpCode = httpCode;
+  }
 }
