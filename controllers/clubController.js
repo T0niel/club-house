@@ -2,6 +2,7 @@ const { body, validationResult } = require('express-validator');
 const { insertClub } = require('../db/queries/clubQueries');
 const bcrypt = require('bcryptjs');
 const util = require('util');
+const HttpError = require('../errors/httpError');
 const hashAsync = util.promisify(bcrypt.hash);
 
 const getCreateClub = (req, res) => {
@@ -15,7 +16,7 @@ const createClubSchema = [
     .isLength({ min: 3, max: 10 })
     .withMessage('Club name must be between 3 at 10 characters'),
   body('description')
-    .optional({values: 'falsy'})
+    .optional({ values: 'falsy' })
     .trim()
     .isLength({ min: 4, max: 40 })
     .withMessage('Club description should be between 4 and 20 characters'),
@@ -48,13 +49,22 @@ const createClub = async (req, res, next) => {
 
   const { password, name, description } = req.body;
   const { id } = req.user;
+
+  let passwordHash;
   try {
-    const passwordHash = await hashAsync(password, 10);
-    await insertClub(name, description, id, passwordHash);
+    passwordHash = await hashAsync(password, 10);
   } catch (e) {
-    next(e);
+    next(new HttpError('Internal server error', 500));
     return;
   }
+
+  try {
+    await insertClub(name, description, id, passwordHash);
+  } catch (e) {
+    next(new HttpError('Club already exists', 409));
+    return;
+  }
+
   res.redirect('/');
 };
 

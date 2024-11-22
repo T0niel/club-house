@@ -7,6 +7,7 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const pool = require('./db/pool');
 const passport = require('passport');
+const HttpError = require('./errors/httpError');
 const app = express();
 
 app.use(
@@ -31,6 +32,20 @@ app.set('view engine', 'ejs');
 
 app.use('/', indexRouter);
 app.use('/clubs', clubRouter);
+
+//Catch all route
+app.use((req, res, next) => {
+  next(new HttpError('Resource not found', 404));
+})
+
+app.use((err, req, res, next) => {
+  //Error is not a httpError that is its a runtime error
+  if (!err.httpCode) {
+    err = new HttpError('Internal server error', 500);
+  }
+
+  res.render('error', { message: err.message, errorCode: err.httpCode });
+});
 
 const PORT = process.env.PORT || 3000;
 
