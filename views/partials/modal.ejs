@@ -1,0 +1,19 @@
+<div class="<%= (locals.show ? "block" : "hidden")%>">
+  <div
+    class="absolute z-50 top-0 bottom-0 left-0 right-0 flex flex-col justify-center items-center bg-transparent-gray-bg"
+  >
+    <div class="relative bg-white min-w-[95%] md:min-w-[40%] rounded-md">
+      <button id="hideModal" class="block ml-auto mr-2 mt-1 p-2">
+        <img src="/images/icons/cross.svg" alt="" class="w-5 h-5" />
+      </button>
+      <div class="p-2"><%-include(locals.linkToViewRelative)%></div>
+    </div>
+  </div>
+</div>
+<script>
+  const hideBtn = document.querySelector('#hideModal');
+
+  hideBtn.addEventListener('click', () => {
+    window.location.href = '/';
+  });
+</script>

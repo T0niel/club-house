@@ -3,6 +3,9 @@ module.exports = {
   content: ['./views/**/*.ejs'],
   theme: {
     extend: {
+      colors: {
+        'transparent-gray-bg': 'rgba(0, 0, 0, 0.5)',
+      },    
       backgroundImage: {
         'index-background': "url('/images/index-layer.svg')",
       },
