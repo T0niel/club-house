@@ -1,5 +1,5 @@
 <section class="w-96 m-auto pb-10 pt-4">
-  <form action="clubs/create" method="post">
+  <form action="" method="post" novalidate>
     <div class="mb-5">
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900">
         Your club name<span class="text-red-500">*</span>
@@ -58,7 +58,7 @@
       Create
     </button>
     <% if(locals.errors){%>
-    <ul class="flex flex-col items-center">
+    <ul class="flex flex-col mt-4">
       <%locals.errors.forEach(({msg}) => {%>
       <li class="mt-0 m-0 text-red-400 list-disc"><%=msg%></li>
       <%})%>
