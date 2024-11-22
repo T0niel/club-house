@@ -26,7 +26,7 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS clubs (
         id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-        club_name VARCHAR(100) NOT NULL,
+        club_name VARCHAR(100) UNIQUE NOT NULL,
         club_description TEXT NOT NULL,
         user_admin_id BIGINT NOT NULL,
         join_password VARCHAR(255) NOT NULL,
