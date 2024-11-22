@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/output.css" />
+    <title><%=locals.errorCode%></title>
+  </head>
+  <body>
+    <section class="bg-white min-h-screen flex items-center justify-center">
+      <div class="py-12 px-6 mx-auto max-w-screen-xl lg:py-20 lg:px-8">
+        <div class="mx-auto max-w-screen-sm text-center space-y-6">
+          <h1
+            class="text-7xl lg:text-9xl font-extrabold tracking-tight text-primary-600"
+          >
+            <%= locals.errorCode %>
+          </h1>
+          <p
+            class="text-2xl md:text-4xl font-bold tracking-tight text-gray-800"
+          >
+            <%= locals.message %>
+          </p>
+          <p class="text-lg text-gray-600">
+            It seems like something went wrong :/
+          </p>
+          <a href="/">
+            <button
+              type="button"
+              class="text-white mt-4 bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded text-sm px-5 py-2.5 text-center me-2 mb-2"
+            >
+              Go back to homepage
+            </button>
+          </a>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
