@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const indexRouter = require('./routes/indexRouter');
 const clubRouter = require('./routes/clubRouter');
+const postRouter = require('./routes/postRouter');
 const path = require('path');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
@@ -32,6 +33,7 @@ app.set('view engine', 'ejs');
 
 app.use('/', indexRouter);
 app.use('/clubs', clubRouter);
+app.use('/posts', postRouter);
 
 //Catch all route
 app.use((req, res, next) => {

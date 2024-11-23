@@ -39,7 +39,7 @@ const postSignUpPage = [
 
     const hashedPassword = await hashAsync(password, 10);
 
-    const result = await insertUser(first_name, last_name, email, hashedPassword);
+    const result = await insertUser(first_name, last_name, email, hashedPassword, 2);
     const generalClub = await getClubByName('general');
     if(generalClub){
       await insertClubMember(generalClub.id, result.id);
