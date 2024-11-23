@@ -1,12 +1,18 @@
 const { body, validationResult } = require('express-validator');
-const { insertClub } = require('../db/queries/clubQueries');
+const {
+  insertClub,
+  clubExists,
+  getClubByName,
+  insertClubMember,
+} = require('../db/queries/clubQueries');
 const bcrypt = require('bcryptjs');
 const util = require('util');
 const HttpError = require('../errors/httpError');
 const hashAsync = util.promisify(bcrypt.hash);
+const compareAsync = util.promisify(bcrypt.compare);
 
 const getCreateClub = (req, res) => {
-  res.render('homepage', { user: req.user, showModal: true });
+  res.render('homepage', { user: req.user, showCreateModal: true });
 };
 
 const createClubSchema = [
@@ -68,7 +74,50 @@ const createClub = async (req, res, next) => {
   res.redirect('/');
 };
 
+//join club logic
+
+const joinClubSchema = [
+  body('name').notEmpty().withMessage('Name is required'),
+  body('password').notEmpty().withMessage('Join password is required'),
+];
+
+function getJoinClub(req, res) {
+  res.render('homepage', { user: req.user, showClubModal: true });
+}
+
+async function joinClub(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.locals.errors = errors.array();
+    res.render('homepage', { user: req.user, showClubModal: true });
+    return;
+  }
+
+  const { name, password } = req.body;
+  const exists = await clubExists(name);
+  if (!exists) {
+    res.locals.errors = [{ msg: 'No club with this name exists' }];
+    res.render('homepage', { user: req.user, showClubModal: true });
+    return;
+  }
+
+  const club = await getClubByName(name);
+
+  const match = await compareAsync(password, club.join_password);
+  if (!match) {
+    res.locals.errors = [{ msg: 'incorrect join password' }];
+    res.render('homepage', { user: req.user, showClubModal: true });
+    return;
+  }
+
+  console.log(req.user);
+  await insertClubMember(club.id, req.user.id);
+  res.redirect('/');
+}
+
 module.exports = {
   getCreateClub,
+  getJoinClub,
   createClub: [createClubSchema, createClub],
+  joinClub: [joinClubSchema, joinClub],
 };

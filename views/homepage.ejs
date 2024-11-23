@@ -7,8 +7,8 @@
     <title>Home</title>
   </head>
   <body class="bg-gray-200">
-    <%-include('partials/modal.ejs', {linkToViewRelative:
-    './createClubModalContent', show: locals.showModal})%>
+    <%-include('partials/createClubModal.ejs', {show: locals.showCreateModal})%>
+    <%-include('partials/joinClubModal.ejs', {show: locals.showClubModal})%>
 
     <!-- button to display dashboard in mobile -->
     <button
@@ -54,12 +54,14 @@
               Create club
             </button>
           </a>
-          <button
-            type="button"
-            class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-gray-100 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
-          >
-            Join club
-          </button>
+          <a href="clubs/join">
+            <button
+              type="button"
+              class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-gray-100 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
+            >
+              Join club
+            </button>
+          </a>
         </div>
       </div>
     </div>
@@ -68,6 +70,12 @@
         const side = document.getElementById('default-sidebar');
         side.style.display = side.style.display === 'block' ? 'none' : 'block';
       }
+
+      const hideBtn = document.querySelectorAll('#hideModal');
+      hideBtn.forEach(btn => btn.addEventListener('click', () => {
+        console.log('clicked');
+        window.location.href = '/';
+      }))
     </script>
   </body>
 </html>
