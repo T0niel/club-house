@@ -5,6 +5,7 @@ const {
   getClubByName,
   insertClubMember,
   getClubs,
+  deleteClubMember,
 } = require('../db/queries/clubQueries');
 const bcrypt = require('bcryptjs');
 const util = require('util');
@@ -119,7 +120,7 @@ async function joinClub(req, res) {
 async function getJoinedClubs(req, res) {
   const { id } = req.user;
   const clubs = await getClubs(id);
-  res.render('myClubs', {
+  res.render('joinedClubs', {
     clubs: clubs.map((club) => ({
       ...club,
       is_admin: Number(club.user_admin_id) === Number(id),
@@ -127,10 +128,51 @@ async function getJoinedClubs(req, res) {
   });
 }
 
+//leaving club
+async function getLeaveClub(req, res, next) {
+  const { name } = req.params;
+
+  const exists = await clubExists(name);
+  if (!exists) {
+    next(new HttpError('No such club', 500));
+    return;
+  }
+
+  res.render('leaveClub', { club: { name } });
+}
+
+const leaveClubSchema = [
+  body('name').notEmpty().withMessage('Name is required'),
+  body('password').notEmpty().withMessage('Join password is required'),
+];
+
+async function leaveClub(req, res) {
+  const { name, password } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.locals.errors = errors.array();
+    res.render('leaveClub', { club: { name } });
+    return;
+  }
+
+  const match = await compareAsync(password, req.user.password);
+  if (match) {
+    res.redirect('/');
+    const club = await getClubByName(name);
+    await deleteClubMember(club.id, req.user.id);
+    return;
+  }
+
+  res.locals.errors = [{ msg: 'Incorrect password' }];
+  res.render('leaveClub', { club: { name } });
+}
+
 module.exports = {
   getCreateClub,
   getJoinClub,
   getJoinedClubs,
+  getLeaveClub,
   createClub: [createClubSchema, createClub],
   joinClub: [joinClubSchema, joinClub],
+  leaveClub: [leaveClubSchema, leaveClub],
 };

@@ -32,7 +32,7 @@
 
     <div class="flex">
       <%- include('partials/userDashboard.ejs') %>
-      <div class="flex flex-col w-full gap-4 mt-10 items-center">
+      <div class="flex flex-col flex-1 gap-4 mt-10 items-center">
         <% locals.clubs.forEach(club => { %>
         <div
           class="relative block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow w-[90%] sm:w-[70%]"
@@ -67,7 +67,7 @@
               class="hidden absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200"
               id="dropdown"
             >
-              <a href="/clubs/leave/<%club.club_name%>">
+              <a href="/clubs/leave/<%=club.club_name%>">
                 <button
                   class="block px-4 py-2 w-full text-left text-white rounded hover:bg-red-400 bg-red-500"
                 >

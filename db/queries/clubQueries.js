@@ -71,10 +71,18 @@ async function getClubs(userId) {
   return rows;
 }
 
+async function deleteClubMember(clubId, userId){
+  const query = `DELETE FROM club_members WHERE club_id = $1 AND user_id = $2`;
+
+  const {rows} = pool.query(query, [clubId, userId]);
+  return rows;
+}
+
 module.exports = {
   insertClub,
   clubExists,
   getClubByName,
   insertClubMember,
   getClubs,
+  deleteClubMember,
 };
