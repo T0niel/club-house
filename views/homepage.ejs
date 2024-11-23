@@ -7,8 +7,7 @@
     <title>Home</title>
   </head>
   <body class="bg-gray-200">
-    <%-include('partials/modal.ejs', {linkToViewRelative:
-    './createClubModalContent', show: locals.showModal})%>
+    <%-include('partials/createClubModal.ejs', {show: locals.showModal})%>
 
     <!-- button to display dashboard in mobile -->
     <button
