@@ -143,7 +143,7 @@ async function getLeaveClub(req, res, next) {
 
 const leaveClubSchema = [
   body('name').notEmpty().withMessage('Name is required'),
-  body('password').notEmpty().withMessage('Join password is required'),
+  body('password').notEmpty().withMessage('User password is required'),
 ];
 
 async function leaveClub(req, res) {

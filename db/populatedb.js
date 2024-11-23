@@ -44,7 +44,7 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    IF NOT EXISTS messages (
+    IF NOT EXISTS posts (
         id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
         title VARCHAR(100) NOT NULL,
         description TEXT NOT NULL,
