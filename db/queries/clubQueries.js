@@ -32,7 +32,7 @@ async function insertClub(
 }
 
 async function getClubByName(name) {
-  const query = `SELECT * FROM clubs WHERE club_name = $1`;
+  const query = `SELECT * FROM clubs WHERE club_name ILIKE $1`;
 
   const { rows } = await pool.query(query, [name]);
   return rows[0];
@@ -55,6 +55,25 @@ async function insertClubMember(clubId, userId) {
             );
   `;
 
+  const { rows } = pool.query(query, [clubId, userId]);
+  return rows;
+}
+
+async function getClubs(userId) {
+  const query = `
+    SELECT * FROM clubs c
+      INNER JOIN club_members cm ON c.id = cm.club_id
+    WHERE
+      cm.user_id = $1;
+  `;
+
+  const { rows } = await pool.query(query, [userId]);
+  return rows;
+}
+
+async function deleteClubMember(clubId, userId){
+  const query = `DELETE FROM club_members WHERE club_id = $1 AND user_id = $2`;
+
   const {rows} = pool.query(query, [clubId, userId]);
   return rows;
 }
@@ -64,4 +83,6 @@ module.exports = {
   clubExists,
   getClubByName,
   insertClubMember,
+  getClubs,
+  deleteClubMember,
 };
