@@ -6,8 +6,7 @@ async function insertClub(
   userAdminId,
   joinPassword
 ) {
-  const { rows } = await pool.query(
-    `
+  const query = `
         INSERT INTO 
             clubs(
                 club_name,
@@ -21,13 +20,48 @@ async function insertClub(
                 $3,
                 $4
             ) RETURNING id;
-    `,
-    [clubName, clubDescription, userAdminId, joinPassword]
-  );
+    `;
+  const { rows } = await pool.query(query, [
+    clubName,
+    clubDescription,
+    userAdminId,
+    joinPassword,
+  ]);
 
   return rows[0].id;
 }
 
+async function getClubByName(name) {
+  const query = `SELECT * FROM clubs WHERE club_name = $1`;
+
+  const { rows } = await pool.query(query, [name]);
+  return rows[0];
+}
+
+async function clubExists(name) {
+  return !!(await getClubByName(name));
+}
+
+async function insertClubMember(clubId, userId) {
+  const query = `
+        INSERT INTO 
+            club_members(
+                club_id,
+                user_id
+            ) 
+            VALUES (
+                $1,
+                $2
+            );
+  `;
+
+  const {rows} = pool.query(query, [clubId, userId]);
+  return rows;
+}
+
 module.exports = {
   insertClub,
+  clubExists,
+  getClubByName,
+  insertClubMember,
 };
