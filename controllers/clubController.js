@@ -4,6 +4,7 @@ const {
   clubExists,
   getClubByName,
   insertClubMember,
+  getClubs,
 } = require('../db/queries/clubQueries');
 const bcrypt = require('bcryptjs');
 const util = require('util');
@@ -110,14 +111,26 @@ async function joinClub(req, res) {
     return;
   }
 
-  console.log(req.user);
   await insertClubMember(club.id, req.user.id);
   res.redirect('/');
+}
+
+//get clubs
+async function getJoinedClubs(req, res) {
+  const { id } = req.user;
+  const clubs = await getClubs(id);
+  res.render('myClubs', {
+    clubs: clubs.map((club) => ({
+      ...club,
+      is_admin: Number(club.user_admin_id) === Number(id),
+    })),
+  });
 }
 
 module.exports = {
   getCreateClub,
   getJoinClub,
+  getJoinedClubs,
   createClub: [createClubSchema, createClub],
   joinClub: [joinClubSchema, joinClub],
 };

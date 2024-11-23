@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/output.css" />
+    <title>Home</title>
+  </head>
+  <body class="bg-gray-200">
+    <!-- button to display dashboard in mobile -->
+    <button
+      aria-controls="sidebar-multi-level-sidebar"
+      type="button"
+      onclick="toggleSidebar()"
+      class="block p-2 w-full lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+    >
+      <span class="sr-only">Open sidebar</span>
+      <svg
+        class="w-6 h-6"
+        aria-hidden="true"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          clip-rule="evenodd"
+          fill-rule="evenodd"
+          d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+        ></path>
+      </svg>
+    </button>
+
+    <div class="flex">
+      <%- include('partials/userDashboard.ejs') %>
+      <div class="flex flex-col w-full gap-4 mt-10 items-center">
+        <% locals.clubs.forEach(club => { %>
+        <div
+          class="relative block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow w-[90%] sm:w-[70%]"
+        >
+          <% if (!club.is_admin) { %>
+          <div class="absolute top-3 right-3 cursor-pointer">
+            <svg
+              onclick="toggleDropdown(event)"
+              class="w-5 h-5 text-gray-500 transition duration-75 hover:text-gray-900"
+              version="1.1"
+              id="Layer_1"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px"
+              y="0px"
+              width="20px"
+              height="20px"
+              viewBox="0 0 29.957 122.88"
+              enable-background="new 0 0 29.957 122.88"
+              xml:space="preserve"
+              fill="currentColor"
+            >
+              <g>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M14.978,0c8.27,0,14.979,6.708,14.979,14.979c0,8.27-6.709,14.976-14.979,14.976 C6.708,29.954,0,23.249,0,14.979C0,6.708,6.708,0,14.978,0L14.978,0z M14.978,92.926c8.27,0,14.979,6.708,14.979,14.979 s-6.709,14.976-14.979,14.976C6.708,122.88,0,116.175,0,107.904S6.708,92.926,14.978,92.926L14.978,92.926z M14.978,46.463 c8.27,0,14.979,6.708,14.979,14.979s-6.709,14.978-14.979,14.978C6.708,76.419,0,69.712,0,61.441S6.708,46.463,14.978,46.463 L14.978,46.463z"
+                />
+              </g>
+            </svg>
+            <div
+              class="hidden absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200"
+              id="dropdown"
+            >
+              <a href="/clubs/leave/<%club.club_name%>">
+                <button
+                  class="block px-4 py-2 w-full text-left text-white rounded hover:bg-red-400 bg-red-500"
+                >
+                  Leave
+                </button>
+              </a>
+            </div>
+          </div>
+          <% } %>
+
+          <h5 class="mb-2 text-2xl font-bold tracking-tight text-graygreen-700">
+            <%= club.club_name %>
+          </h5>
+          <p class="font-normal text-gray-700"><%= club.club_description %></p>
+          <% if(club.is_admin){%>
+          <p class="text-teal-500 text-sm mt-2">You own this</p>
+          <%} %>
+          <a href="/clubs/messages">
+            <button
+              class="relative inline-flex items-center justify-center mt-5 p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white focus:ring-4 focus:outline-none focus:ring-green-200"
+            >
+              <span
+                class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+              >
+                Go to club
+              </span>
+            </button>
+          </a>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <script>
+      function toggleSidebar() {
+        const side = document.getElementById('default-sidebar');
+        side.style.display = side.style.display === 'block' ? 'none' : 'block';
+      }
+
+      function toggleDropdown(event) {
+        event.stopPropagation();
+        const dropdown = event.target.closest('div').querySelector('#dropdown');
+        dropdown.classList.toggle('hidden');
+      }
+
+      document.addEventListener('click', () => {
+        document.querySelectorAll('#dropdown').forEach((dropdown) => {
+          dropdown.classList.add('hidden');
+        });
+      });
+    </script>
+  </body>
+</html>

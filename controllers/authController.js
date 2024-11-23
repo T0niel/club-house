@@ -8,6 +8,7 @@ const {
 const bcrypt = require('bcryptjs');
 const util = require('util');
 const passport = require('passport');
+const { getClubByName, insertClubMember } = require('../db/queries/clubQueries');
 const LocalStrategy = require('passport-local').Strategy;
 
 const hashAsync = util.promisify(bcrypt.hash);
@@ -38,7 +39,11 @@ const postSignUpPage = [
 
     const hashedPassword = await hashAsync(password, 10);
 
-    await insertUser(first_name, last_name, email, hashedPassword);
+    const result = await insertUser(first_name, last_name, email, hashedPassword);
+    const generalClub = await getClubByName('general');
+    if(generalClub){
+      await insertClubMember(generalClub.id, result.id);
+    } 
     next();
   },
   passport.authenticate('local', {
