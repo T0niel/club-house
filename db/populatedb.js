@@ -1,5 +1,18 @@
 const { Client } = require('pg');
-const dbConnectionString = process.argv[2];
+const bcrypt = require('bcryptjs');
+const util = require('util');
+
+const hashAsync = util.promisify(bcrypt.hash);
+const args = process.argv.slice(2);
+
+const dbConnectionString = args[0];
+let adminInfo = {};
+
+try {
+  adminInfo = JSON.parse(args[1]);
+} catch (err) {
+  console.error('Invalid JSON object:', err);
+}
 
 const client = new Client({
   connectionString: dbConnectionString,
@@ -74,12 +87,59 @@ INSERT INTO
     )
 VALUES
     ('admin'),
-    ('user')`;
+    ('user');
+       
+`;
+
+const insertAdmin = `
+INSERT INTO
+    users (
+        first_name,
+        last_name,
+        email,
+        password,
+        user_role_id
+    )
+    VALUES
+        ($1, $2, $3, $4, $5);
+`;
+
+const insertGeneralClub = `
+INSERT INTO
+    clubs (
+        club_name,
+        club_description,
+        user_admin_id,
+        join_password
+    )
+VALUES
+    ('General', 'General club', 1, ''); 
+`;
+
+const insertClubMembers = `
+INSERT INTO
+    club_members (
+        club_id,
+        user_id
+    )
+VALUES
+    (1, 1);
+`
 
 async function main() {
   console.log('Seeding...');
   await client.connect();
   await client.query(sql);
+  const password = await hashAsync(adminInfo.password, 10);
+  await client.query(insertAdmin, [
+    adminInfo.firstName,
+    adminInfo.lastName,
+    adminInfo.email,
+    password,
+    1,
+  ]);
+  await client.query(insertGeneralClub);
+  await client.query(insertClubMembers);
   await client.end();
   console.log('Done.');
 }
