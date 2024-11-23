@@ -67,7 +67,8 @@ const createClub = async (req, res, next) => {
   }
 
   try {
-    await insertClub(name, description, id, passwordHash);
+    const clubId = await insertClub(name, description, id, passwordHash);
+    await insertClubMember(clubId, id);
   } catch (e) {
     next(new HttpError('Club already exists', 409));
     return;

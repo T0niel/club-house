@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/output.css" />
+    <title>Home</title>
+  </head>
+  <body class="bg-gray-200">
+    <!-- button to display dashboard in mobile -->
+    <button
+      aria-controls="sidebar-multi-level-sidebar"
+      type="button"
+      onclick="toggleSidebar()"
+      class="block p-2 w-full lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+    >
+      <span class="sr-only">Open sidebar</span>
+      <svg
+        class="w-6 h-6"
+        aria-hidden="true"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          clip-rule="evenodd"
+          fill-rule="evenodd"
+          d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+        ></path>
+      </svg>
+    </button>
+
+    <div class="flex">
+        <%- include('partials/userDashboard.ejs') %>
+        <%
+            if(locals.error){%>
+                <h1><%=locals.error.msg%></h1>            
+            <%}else{%>
+                <h1>Welcome</h1>
+            <%}
+        %>
+    </div>
+
+    <script>
+      function toggleSidebar() {
+        const side = document.getElementById('default-sidebar');
+        side.style.display = side.style.display === 'block' ? 'none' : 'block';
+      }
+
+      document.addEventListener('click', () => {
+        document.querySelectorAll('#dropdown').forEach((dropdown) => {
+          dropdown.classList.add('hidden');
+        });
+      });
+    </script>
+  </body>
+</html>
