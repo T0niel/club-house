@@ -81,11 +81,11 @@
           <h5 class="mb-2 text-2xl font-bold tracking-tight text-graygreen-700">
             <%= club.club_name %>
           </h5>
-          <p class="font-normal text-gray-700"><%= club.club_description %></p>
+          <p class="font-normal text-gray-700 overflow-hidden line-clamp-3 w-full"><%= club.club_description %></p>
           <% if(club.is_admin){%>
           <p class="text-teal-500 text-sm mt-2">You own this</p>
           <%} %>
-          <a href="/clubs/messages">
+          <a href="/posts/<%=club.club_name%>">
             <button
               class="relative inline-flex items-center justify-center mt-5 p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white focus:ring-4 focus:outline-none focus:ring-green-200"
             >
