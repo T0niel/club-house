@@ -50,7 +50,7 @@ const createClub = async (req, res, next) => {
     res.locals.errors = errors.array();
     res.render('homepage', {
       user: req.user,
-      showModal: true,
+      showCreateModal: true,
     });
     return;
   }

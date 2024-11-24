@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/output.css" />
+    <title>Login</title>
+  </head>
+  <body>
+    <!-- If there was a error for creating this post (not form validation) -->
+    <% if(locals.error){%>
+    <div class="min-h-[100vh] flex justify-center items-center w-full">
+      <div class="text-2xl text-gray-600 text-center">
+        <h1 class="font-bold"><%=locals.error.msg%></h1>
+        <p class="text-red-500">&#58;&#40;</p>
+      </div>
+    </div>
+    <%} else {%>
+    <section class="block flex-[2]">
+      <div
+        class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0"
+      >
+        <div
+          class="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0"
+        >
+          <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+            <h1
+              class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl"
+            >
+              Create post on <%=locals.club.club_name%>
+            </h1>
+            <form
+              class="space-y-4 md:space-y-6"
+              action=""
+              method="post"
+              novalidate
+            >
+              <div>
+                <label
+                  for="title"
+                  class="block mb-2 text-sm font-medium text-gray-900"
+                  >Title*</label
+                >
+                <input
+                  type="title"
+                  name="title"
+                  id="title"
+                  placeholder="Title"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                  required=""
+                />
+              </div>
+              <div>
+                <label
+                  for="description"
+                  class="block mb-2 text-sm font-medium text-gray-900"
+                  >Description*</label
+                >
+                <textarea
+                  id="message"
+                  rows="4"
+                  name="description"
+                  class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 resize-none"
+                  placeholder="Write your thoughts here..."
+                ></textarea>
+              </div>
+              <button
+                type="submit"
+                class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-gray-900"
+              >
+                Create
+              </button>
+              <% if(locals.errors){%>
+              <ul class="flex flex-col items-center">
+                <%locals.errors.forEach(({msg}) => {%>
+                <li class="mt-0 m-0 text-red-400 list-disc"><%=msg%></li>
+                <%})%>
+              </ul>
+              <%}%>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+    <%} %>
+  </body>
+</html>
