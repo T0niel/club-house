@@ -31,20 +31,128 @@
     </button>
 
     <div class="flex">
-        <%- include('partials/userDashboard.ejs') %>
-        <%
-            if(locals.error){%>
-                <h1><%=locals.error.msg%></h1>            
-            <%}else{%>
-                <h1>Welcome</h1>
-            <%}
-        %>
+      <%- include('partials/userDashboard.ejs') %> <% if(locals.error){%>
+      <div class="min-h-[100vh] flex justify-center items-center w-full">
+        <div class="text-2xl text-gray-600 text-center">
+          <h1 class="font-bold"><%=locals.error.msg%></h1>
+          <p class="text-red-500">&#58;&#40;</p>
+        </div>
+      </div>
+      <%}else{%>
+      <div class="flex-1 min-h-[100vh]">
+        <div
+          class="sm:flex gap-2 ml-10 mt-10 flex-wrap border-b-2 border-gray-300 pb-4 mr-10"
+        >
+          <div>
+            <h1 class="text-3xl font-bold"><%=locals.club.club_name%></h1>
+            <p class="ml-5 text-slate-500 mt-2">
+              <%=locals.club.club_description%>
+            </p>
+          </div>
+          <div
+            class="flex flex-col w-52 items-center mt-2 sm:mt-0 gap-2 ml-[auto]"
+          >
+            <div class="flex w-full">
+              <a href="/posts/<%=locals.club.club_name%>/create">
+                <button
+                  class="relative inline-flex flex-1 items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 hover:text-white rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 m-auto"
+                >
+                  <span
+                    class="relative px-5 py-2.5 transition-all w-[100%] ease-in duration-75 sm:bg-gray-100 rounded-md group-hover:bg-opacity-0"
+                  >
+                    Post +
+                  </span>
+                </button>
+              </a>
+              <div class="flex-1 relative">
+                <%if(!locals.club.is_admin){%>
+                <div class="absolute top-3 right-3 cursor-pointer">
+                  <svg
+                    onclick="toggleDropdown(event)"
+                    class="w-5 h-5 text-gray-500 transition duration-75 hover:text-gray-900"
+                    version="1.1"
+                    id="Layer_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    x="0px"
+                    y="0px"
+                    width="20px"
+                    height="20px"
+                    viewBox="0 0 29.957 122.88"
+                    enable-background="new 0 0 29.957 122.88"
+                    xml:space="preserve"
+                    fill="currentColor"
+                  >
+                    <g>
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M14.978,0c8.27,0,14.979,6.708,14.979,14.979c0,8.27-6.709,14.976-14.979,14.976 C6.708,29.954,0,23.249,0,14.979C0,6.708,6.708,0,14.978,0L14.978,0z M14.978,92.926c8.27,0,14.979,6.708,14.979,14.979 s-6.709,14.976-14.979,14.976C6.708,122.88,0,116.175,0,107.904S6.708,92.926,14.978,92.926L14.978,92.926z M14.978,46.463 c8.27,0,14.979,6.708,14.979,14.979s-6.709,14.978-14.979,14.978C6.708,76.419,0,69.712,0,61.441S6.708,46.463,14.978,46.463 L14.978,46.463z"
+                      />
+                    </g>
+                  </svg>
+                  <div
+                    class="hidden absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200"
+                    id="dropdown"
+                  >
+                    <a href="/clubs/leave/<%=club.club_name%>">
+                      <button
+                        class="block px-4 py-2 w-full text-left text-gray-800 rounded"
+                      >
+                        Leave
+                      </button>
+                    </a>
+                  </div>
+                </div>
+                <%}%>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 px-4">
+          <% locals.posts.forEach(({ title, description, formatedDate,
+          first_name, last_name, email, self }) => { %>
+          <div
+            class="max-w-xl <%=(self ? 'ml-auto' : '')%> mb-4 p-4 bg-gray-100 border-teal-500 border-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div class="flex justify-between items-center">
+              <h2 class="text-lg font-semibold text-gray-800"><%= title %></h2>
+              <p class="text-sm text-gray-500"><%= formatedDate %></p>
+            </div>
+            <p class="mt-2 text-gray-600"><%= description %></p>
+            <div class="mt-4 flex items-center space-x-2">
+              <div class="relative group">
+                <span
+                  class="text-blue-600 font-medium hover:underline"
+                  title="<%= email %>"
+                >
+                  <%= first_name %> <%= last_name %>
+                </span>
+                <div
+                  class="absolute hidden group-hover:flex bg-gray-800 text-white text-sm rounded-md px-2 py-1 mt-1 shadow-md"
+                  style="white-space: nowrap"
+                >
+                  <%= email %>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+      <%} %>
     </div>
 
     <script>
       function toggleSidebar() {
         const side = document.getElementById('default-sidebar');
         side.style.display = side.style.display === 'block' ? 'none' : 'block';
+      }
+
+      function toggleDropdown(event) {
+        event.stopPropagation();
+        const dropdown = event.target.closest('div').querySelector('#dropdown');
+        dropdown.classList.toggle('hidden');
       }
 
       document.addEventListener('click', () => {
