@@ -4,17 +4,15 @@ const {
   clubExists,
   userHasClub,
 } = require('../db/queries/clubQueries');
-const { insertPost, getAllPostsAndUsers } = require('../db/queries/postsQueries');
+const {
+  insertPost,
+  getAllPostsAndUsers,
+} = require('../db/queries/postsQueries');
 const moment = require('moment');
+const HttpError = require('../errors/httpError');
 
 async function getPostsPage(req, res) {
   const { club } = req.params;
-
-  const canView = await userAuthToViewPosts(club, req.user.id);
-  if (!canView) {
-    res.render('posts', { error: { msg: 'You do not belong on this club' } });
-    return;
-  }
 
   const clubData = await getClubByName(club);
   const posts = await getAllPostsAndUsers();
@@ -26,37 +24,36 @@ async function getPostsPage(req, res) {
     posts: posts.map((post) => ({
       ...post,
       formatedDate: moment(post.creation_date).format('MM/DD/YYYY hh:mma'),
-      self: post.user_id === req.user.id
+      self: post.user_id === req.user.id,
     })),
   });
 }
 
-async function userAuthToViewPosts(club, userId) {
+async function userAuthToViewPosts(req, res, next) {
+  const { club } = req.params;
+  const userId = req.user.id;
   const exists = await clubExists(club);
   if (!exists) {
-    return false;
+    return next(new HttpError('You do not belong on this club', 401));
   }
 
   const hasClub = await userHasClub(club, userId);
   if (!hasClub) {
-    return false;
+    return next(
+      new HttpError(
+        'You do not belong on this club',
+        401
+      )
+    );
   }
 
-  return true;
+  return next();
 }
 
 //create logic
 
 async function getCreatePostPage(req, res) {
   const { club } = req.params;
-
-  const canView = await userAuthToViewPosts(club, req.user.id);
-  if (!canView) {
-    res.render('createPost', {
-      error: { msg: 'You do not belong on this club' },
-    });
-    return;
-  }
 
   const clubData = await getClubByName(club);
   res.render('createPost', { club: clubData });
@@ -79,15 +76,6 @@ async function createPost(req, res) {
   const { club } = req.params;
   const clubData = await getClubByName(club);
 
-  const canView = await userAuthToViewPosts(club, req.user.id);
-  if (!canView) {
-    res.render('createPost', {
-      error: { msg: 'You do not belong on this club' },
-      club: clubData,
-    });
-    return;
-  }
-
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.render('createPost', { errors: errors.array(), club: clubData });
@@ -103,7 +91,7 @@ async function createPost(req, res) {
 }
 
 module.exports = {
-  getPostsPage,
-  getCreatePostPage,
-  createPost: [createPostSchema, createPost],
+  getPostsPage: [userAuthToViewPosts, getPostsPage],
+  getCreatePostPage: [userAuthToViewPosts, getCreatePostPage],
+  createPost: [userAuthToViewPosts, createPostSchema, createPost],
 };

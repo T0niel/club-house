@@ -7,15 +7,6 @@
     <title>Login</title>
   </head>
   <body>
-    <!-- If there was a error for creating this post (not form validation) -->
-    <% if(locals.error){%>
-    <div class="min-h-[100vh] flex justify-center items-center w-full">
-      <div class="text-2xl text-gray-600 text-center">
-        <h1 class="font-bold"><%=locals.error.msg%></h1>
-        <p class="text-red-500">&#58;&#40;</p>
-      </div>
-    </div>
-    <%} else {%>
     <section class="block flex-[2]">
       <div
         class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0"
@@ -82,6 +73,5 @@
         </div>
       </div>
     </section>
-    <%} %>
   </body>
 </html>
