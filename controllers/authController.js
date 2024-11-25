@@ -8,43 +8,55 @@ const {
 const bcrypt = require('bcryptjs');
 const util = require('util');
 const passport = require('passport');
-const { getClubByName, insertClubMember } = require('../db/queries/clubQueries');
+const {
+  getClubByName,
+  insertClubMember,
+} = require('../db/queries/clubQueries');
 const LocalStrategy = require('passport-local').Strategy;
 
 const hashAsync = util.promisify(bcrypt.hash);
 const compareAsync = util.promisify(bcrypt.compare);
 
-//Sign up logic starts here
 const getSingupPage = (req, res) => {
   res.render('signup');
 };
 
 const postSignUpPage = [
   async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      res.render('signup', { errors: errors.array() });
-      return;
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.render('signup', { errors: errors.array() });
+        return;
+      }
+
+      const { first_name, last_name, email, password } = req.body;
+
+      const exists = await userExists(email);
+      if (exists) {
+        res.render('signup', {
+          errors: [{ msg: 'User with this email exists' }],
+        });
+        return;
+      }
+
+      const hashedPassword = await hashAsync(password, 10);
+
+      const result = await insertUser(
+        first_name,
+        last_name,
+        email,
+        hashedPassword,
+        2
+      );
+      const generalClub = await getClubByName('general');
+      if (generalClub) {
+        await insertClubMember(generalClub.id, result.id);
+      }
+      next();
+    } catch (error) {
+      next(error);
     }
-
-    const { first_name, last_name, email, password } = req.body;
-
-    const exists = await userExists(email);
-    if (exists) {
-      res.render('signup', {
-        errors: [{ msg: 'User with this email exists' }],
-      });
-      return;
-    }
-
-    const hashedPassword = await hashAsync(password, 10);
-
-    const result = await insertUser(first_name, last_name, email, hashedPassword, 2);
-    const generalClub = await getClubByName('general');
-    if(generalClub){
-      await insertClubMember(generalClub.id, result.id);
-    } 
-    next();
   },
   passport.authenticate('local', {
     successRedirect: '/',
@@ -52,73 +64,33 @@ const postSignUpPage = [
   }),
 ];
 
-const signUpFormSchema = [
-  body('email')
-    .notEmpty()
-    .withMessage('Email must be provided')
-    .isEmail()
-    .withMessage('Email is not valid'),
-  body('first_name')
-    .notEmpty()
-    .withMessage('First name must be provided')
-    .isAlpha()
-    .withMessage('First name must contain characters only')
-    .isLength({ min: 3 })
-    .withMessage('First name must be at least 3 characters')
-    .isLength({ max: 20 })
-    .withMessage('First name must be at maxiumum of 20 characters'),
-  body('last_name')
-    .notEmpty()
-    .withMessage('Last name must be provided')
-    .isAlpha()
-    .withMessage('Last name must contain characters only')
-    .isLength({ min: 3 })
-    .withMessage('Last name must be at least 3 characters')
-    .isLength({ max: 20 })
-    .withMessage('Last name must be at maxiumum of 20 characters'),
-  body('password')
-    .notEmpty()
-    .withMessage('password not provided')
-    .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters long')
-    .custom((value, { req }) => {
-      if (value !== req.body.confirm_password) {
-        throw new Error('Confirm Password does not match Password');
-      }
-      return true;
-    }),
-  body('confirm_password')
-    .notEmpty()
-    .withMessage('confirm password not provided'),
-];
-
-//Login logic starts here
-
 const postLogin = (req, res, next) => {
-  passport.authenticate('local', (err, user) => {
-    if (err) {
-      res.render('login', {
-        errors: [{ msg: 'An error happened while login you in' }],
-      });
-      return;
-    }
-
-    if (!user) {
-      res.render('login', { errors: [{ msg: 'Incorrect email or password' }] });
-      return;
-    }
-
-    req.logIn(user, (err) => {
+  passport.authenticate('local', async (err, user) => {
+    try {
       if (err) {
-        return next(err); // Handle any error during the login process
+        res.render('login', {
+          errors: [{ msg: 'An error happened while login you in' }],
+        });
+        return;
       }
-      return res.redirect('/'); // Redirect to the home page on success
-    });
-  })(req, res, next);
-};
 
-const getLoginPage = (req, res) => {
-  res.render('login');
+      if (!user) {
+        res.render('login', {
+          errors: [{ msg: 'Incorrect email or password' }],
+        });
+        return;
+      }
+
+      req.logIn(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.redirect('/');
+      });
+    } catch (error) {
+      next(error);
+    }
+  })(req, res, next);
 };
 
 passport.use(
@@ -132,27 +104,21 @@ passport.use(
         const user = await findUser(email);
 
         if (!user) {
-          done(false, null);
-          return;
+          return done(null, false);
         }
 
         const match = await compareAsync(password, user.password);
         if (!match) {
-          done(false, null);
-          return;
+          return done(null, false);
         }
 
-        done(false, user);
-      } catch (e) {
-        done(e);
+        return done(null, user);
+      } catch (error) {
+        return done(error);
       }
     }
   )
 );
-
-passport.serializeUser((user, done) => {
-  done(false, user.id);
-});
 
 passport.deserializeUser(async (id, done) => {
   try {
@@ -162,13 +128,11 @@ passport.deserializeUser(async (id, done) => {
       throw new Error('User not found');
     }
 
-    done(false, user);
-  } catch (e) {
-    done(e);
+    done(null, user);
+  } catch (error) {
+    done(error);
   }
 });
-
-//logout logic
 
 const postLogout = (req, res, next) => {
   req.logout((err) => {
