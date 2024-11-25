@@ -102,6 +102,14 @@
             </div>
           </div>
         </div>
+        <% if(locals.posts.length === 0){%>
+        <div class="text-center mt-10">
+          <h1 class="text-gray-900 text-3xl font-bold">
+            Looks like its quiet...
+          </h1>
+          <p class="text-gray-500">Be the first one to post in the club!</p>
+        </div>
+        <%} %>
         <div class="mt-8 px-4">
           <% locals.posts.forEach(({ title, description, formatedDate,
           first_name, last_name, email, self, post_id, status }) => { %>
