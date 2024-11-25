@@ -9,6 +9,8 @@ const isAuth = require('../middlewares/isAuth');
 const router = new Router();
 
 router.get('/:club', isAuth, getPostsPage);
+router.get('/:club/create', isAuth, getCreatePostPage);
+router.post('/:club/create', isAuth, createPost);
 
 router.get('/:club/create', isAuth, getCreatePostPage);
 router.post('/:club/create', isAuth, createPost);
