@@ -22,7 +22,13 @@ const sql = `
 CREATE TABLE
     IF NOT EXISTS user_roles (
         id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-        role_name VARCHAR(255)
+        role_name VARCHAR(255) NOT NULL
+    );
+
+CREATE TABLE
+    IF NOT EXISTS user_status (
+        id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+        status VARCHAR(255) NOT NULL
     );
 
 CREATE TABLE
@@ -33,7 +39,10 @@ CREATE TABLE
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         user_role_id BIGINT,
-        FOREIGN KEY (user_role_id) REFERENCES user_roles (id)
+        user_status_id BIGINT DEFAULT 1,
+        FOREIGN KEY (user_role_id) REFERENCES user_roles (id),
+        FOREIGN KEY (user_status_id) REFERENCES user_roles (id)
+
     );
 
 CREATE TABLE
@@ -56,6 +65,12 @@ CREATE TABLE
         FOREIGN KEY (user_id) REFERENCES users (id)
     );
 
+CREATE TABLE 
+    IF NOT EXISTS posts_status (
+        id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+        status VARCHAR(100) NOT NULL
+    );
+
 CREATE TABLE
     IF NOT EXISTS posts (
         id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -64,8 +79,11 @@ CREATE TABLE
         creation_date TIMESTAMP NOT NULL,
         user_id BIGINT NOT NULL,
         club_id BIGINT NOT NULL,
+        post_status_id BIGINT NOT NULL DEFAULT 1,
+
         FOREIGN KEY (user_id) REFERENCES users (id),
-        FOREIGN KEY (club_id) REFERENCES clubs (id)
+        FOREIGN KEY (club_id) REFERENCES clubs (id),
+        FOREIGN KEY (post_status_id) REFERENCES posts_status (id)
     );
 
 -- This is for storing sessions
@@ -88,7 +106,22 @@ INSERT INTO
 VALUES
     ('admin'),
     ('user');
-       
+
+INSERT INTO 
+    posts_status (
+        status
+    )
+VALUES
+    ('Active'), 
+    ('Deleted');
+
+INSERT INTO 
+    user_status (
+        status
+    )
+VALUES
+    ('Active'), 
+    ('Banned');
 `;
 
 const insertAdmin = `

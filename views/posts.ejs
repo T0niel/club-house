@@ -88,7 +88,7 @@
                     class="hidden absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200"
                     id="dropdown"
                   >
-                    <a href="/clubs/leave/<%=club.club_name%>">
+                    <a href="/clubs/leave/<%=locals.club.club_name%>">
                       <button
                         class="block px-4 py-2 w-full text-left text-gray-800 rounded"
                       >
@@ -104,11 +104,11 @@
         </div>
         <div class="mt-8 px-4">
           <% locals.posts.forEach(({ title, description, formatedDate,
-          first_name, last_name, email, self }) => { %>
+          first_name, last_name, email, self, post_id, status }) => { %>
           <div
             class="relative max-w-xl <%=(self ? 'ml-auto' : '')%> mb-4 p-4 bg-gray-100 border-teal-500 border-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
-            <% if(self){%>
+            <% if(self && status.toLowerCase() === 'active'){%>
             <div class="absolute top-3 right-3 cursor-pointer">
               <svg
                 onclick="toggleDropdown(event)"
@@ -138,22 +138,23 @@
                 class="hidden absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200"
                 id="dropdown"
               >
-                <a href="/posts/delete/<%=club.club_name%>">
+                <form action="/posts/<%=locals.club.club_name%>/delete?id=<%=post_id%>" method="POST">
                   <button
                     class="block px-4 py-2 w-full text-left text-gray-800 rounded"
+                    type="submit"
                   >
                     Delete
                   </button>
-                </a>
+                </form>
               </div>
             </div>
             <%} %>
 
             <div class="flex justify-between items-center">
-              <h2 class="text-lg font-semibold text-gray-800"><%= title %></h2>
+              <h2 class="text-lg font-semibold text-gray-800"><%= (status.toLowerCase() === 'active' ? title : '[Deleted Post]') %></h2>
               <p class="text-sm mr-5 text-gray-500"><%= formatedDate %></p>
             </div>
-            <p class="mt-2 text-gray-600"><%= description %></p>
+            <p class="mt-2 text-gray-600"><%=status.toLowerCase() === 'active' ? description : '[Deleted Post]'%></p>
             <div class="mt-4 flex items-center space-x-2">
               <div class="relative group">
                 <span

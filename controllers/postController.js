@@ -7,6 +7,9 @@ const {
 const {
   insertPost,
   getAllPostsAndUsers,
+  updatePost,
+  setPostStatusToDeleted,
+  userHasPost,
 } = require('../db/queries/postsQueries');
 const moment = require('moment');
 const HttpError = require('../errors/httpError');
@@ -39,12 +42,7 @@ async function userAuthToViewPosts(req, res, next) {
 
   const hasClub = await userHasClub(club, userId);
   if (!hasClub) {
-    return next(
-      new HttpError(
-        'You do not belong on this club',
-        401
-      )
-    );
+    return next(new HttpError('You do not belong on this club', 401));
   }
 
   return next();
@@ -90,8 +88,25 @@ async function createPost(req, res) {
   res.redirect(`/posts/${club}`);
 }
 
+async function deletePost(req, res, next) {
+  const user = req.user;
+  const { id } = req.query;
+
+  const hasPost = await userHasPost(user.id, id);
+  if (!hasPost) {
+    next(new HttpError('User not authorize to modify post', 401));
+    return;
+  }
+
+  const { club } = req.params;
+
+  await setPostStatusToDeleted(id);
+  res.redirect(`/posts/${club}`);
+}
+
 module.exports = {
   getPostsPage: [userAuthToViewPosts, getPostsPage],
   getCreatePostPage: [userAuthToViewPosts, getCreatePostPage],
   createPost: [userAuthToViewPosts, createPostSchema, createPost],
+  deletePost: [userAuthToViewPosts, deletePost],
 };
