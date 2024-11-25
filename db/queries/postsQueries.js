@@ -23,7 +23,7 @@ async function insertPost(title, description, creationDate, userId, clubId) {
   ]);
 }
 
-async function getAllPostsAndUsers() {
+async function getAllPostsAndUsers(clubId) {
   const query = `
     SELECT
         *, 
@@ -36,11 +36,12 @@ async function getAllPostsAndUsers() {
     INNER JOIN 
         posts_status ps 
         ON p.post_status_id = ps.id
+    WHERE p.club_id = $1
     ORDER BY
         creation_date
   `;
 
-  const { rows } = await pool.query(query);
+  const { rows } = await pool.query(query, [clubId]);
 
   return rows;
 }

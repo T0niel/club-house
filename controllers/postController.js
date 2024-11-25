@@ -7,7 +7,6 @@ const {
 const {
   insertPost,
   getAllPostsAndUsers,
-  updatePost,
   setPostStatusToDeleted,
   userHasPost,
 } = require('../db/queries/postsQueries');
@@ -18,7 +17,7 @@ async function getPostsPage(req, res) {
   const { club } = req.params;
 
   const clubData = await getClubByName(club);
-  const posts = await getAllPostsAndUsers();
+  const posts = await getAllPostsAndUsers(clubData.id);
   res.render('posts', {
     club: {
       ...clubData,
@@ -91,14 +90,17 @@ async function createPost(req, res) {
 async function deletePost(req, res, next) {
   const user = req.user;
   const { id } = req.query;
+  const { club } = req.params;
+  const clubData = await getClubByName(club);
+
+  const isClubAdmin = Number(clubData.user_admin_id) === Number(req.user.id);
 
   const hasPost = await userHasPost(user.id, id);
-  if (!hasPost) {
+  if (!hasPost && !isClubAdmin) {
     next(new HttpError('User not authorize to modify post', 401));
     return;
   }
 
-  const { club } = req.params;
 
   await setPostStatusToDeleted(id);
   res.redirect(`/posts/${club}`);
