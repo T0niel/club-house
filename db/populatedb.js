@@ -61,7 +61,7 @@ CREATE TABLE
         user_id BIGINT,
         PRIMARY KEY (club_id, user_id),
 
-        FOREIGN KEY (club_id) REFERENCES clubs (id),
+        FOREIGN KEY (club_id) REFERENCES clubs (id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users (id)
     );
 
