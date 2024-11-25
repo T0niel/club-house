@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/output.css" />
+    <title>Home</title>
+  </head>
+  <body class="bg-gray-200">
+    <%-include('partials/createClubModal.ejs', {show: locals.showCreateModal})%>
+    <%-include('partials/joinClubModal.ejs', {show: locals.showClubModal})%>
+
+    <!-- button to display dashboard in mobile -->
+    <button
+      aria-controls="sidebar-multi-level-sidebar"
+      type="button"
+      onclick="toggleSidebar()"
+      class="block p-2 w-full lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+    >
+      <span class="sr-only">Open sidebar</span>
+      <svg
+        class="w-6 h-6"
+        aria-hidden="true"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          clip-rule="evenodd"
+          fill-rule="evenodd"
+          d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+        ></path>
+      </svg>
+    </button>
+
+    <div class="flex">
+      <%-include('partials/userDashboard.ejs')%>
+
+      <div class="min-h-[100vh] flex flex-col flex-1">
+        <div class="mx-auto mt-8">
+          <%if(locals.clubs.length === 0){%>
+          <h1 class="text-2xl font-bold mb-4 text-center">
+            You do not own any club
+          </h1>
+          <%}else{%>
+          <h1 class="text-2xl font-bold mb-4">Owned Clubs</h1>
+          <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
+            <table class="w-full text-sm text-left text-gray-500">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3">Club Name</th>
+                  <th scope="col" class="px-6 py-3">Description</th>
+                  <th scope="col" class="px-6 py-3">Admin Name</th>
+                  <th scope="col" class="px-6 py-3">Admin Email</th>
+                  <th scope="col" class="px-6 py-3">Total Members</th>
+                  <th scope="col" class="px-6 py-3">Total Posts</th>
+                  <th scope="col" class="px-6 py-3">Active Posts</th>
+                  <th scope="col" class="px-6 py-3">Deleted Posts</th>
+                  <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% clubs.forEach(club => { %>
+                <tr class="bg-white border-b hover:bg-gray-50">
+                  <td class="px-6 py-4 font-medium text-gray-900">
+                    <%= club.club_name %>
+                  </td>
+                  <td class="px-6 py-4"><%= club.club_description %></td>
+                  <td class="px-6 py-4"><%= club.admin_name %></td>
+                  <td class="px-6 py-4"><%= club.admin_email %></td>
+                  <td class="px-6 py-4"><%= club.total_members %></td>
+                  <td class="px-6 py-4"><%= club.total_posts %></td>
+                  <td class="px-6 py-4"><%= club.active_posts %></td>
+                  <td class="px-6 py-4"><%= club.deleted_posts %></td>
+                  <td class="px-6 py-4 text-center">
+                    <a href="/clubs/delete/<%=club.club_name%>">
+                      <button
+                        class="text-gray-800 bg-gray-100 hover:bg-red-600 hover:text-white focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2"
+                      >
+                        Delete
+                      </button>
+                    </a>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <%}%>
+        </div>
+      </div>
+    </div>
+    <script>
+      function toggleSidebar() {
+        const side = document.getElementById('default-sidebar');
+        side.style.display = side.style.display === 'block' ? 'none' : 'block';
+      }
+
+      const hideBtn = document.querySelectorAll('#hideModal');
+      hideBtn.forEach((btn) =>
+        btn.addEventListener('click', () => {
+          console.log('clicked');
+          window.location.href = '/';
+        })
+      );
+    </script>
+  </body>
+</html>

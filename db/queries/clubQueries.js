@@ -71,14 +71,14 @@ async function getClubs(userId) {
   return rows;
 }
 
-async function deleteClubMember(clubId, userId){
+async function deleteClubMember(clubId, userId) {
   const query = `DELETE FROM club_members WHERE club_id = $1 AND user_id = $2`;
 
-  const {rows} = await pool.query(query, [clubId, userId]);
+  const { rows } = await pool.query(query, [clubId, userId]);
   return rows;
 }
 
-async function userHasClub(name, userId){
+async function userHasClub(name, userId) {
   const query = `
     SELECT * FROM clubs c
       INNER JOIN club_members cm ON c.id = cm.club_id
@@ -88,8 +88,51 @@ async function userHasClub(name, userId){
       cm.user_id = $2;
   `;
 
-  const {rows} = await pool.query(query, [name, userId]);
+  const { rows } = await pool.query(query, [name, userId]);
   return rows.length > 0;
+}
+
+async function getClubsInfoByAdminId(adminId) {
+  const query = `
+    SELECT
+          c.id AS club_id,
+          c.club_name,
+          c.club_description,
+          CONCAT(u.first_name, ' ', u.last_name) AS admin_name,
+          u.email AS admin_email,
+          COUNT(DISTINCT cm.user_id) AS total_members,
+          COUNT(DISTINCT p.id) AS total_posts,
+          SUM(CASE WHEN ps.status = 'Active' THEN 1 ELSE 0 END) AS active_posts,
+          SUM(CASE WHEN ps.status = 'Deleted' THEN 1 ELSE 0 END) AS deleted_posts
+    FROM 
+        clubs c
+    LEFT JOIN 
+        users u ON c.user_admin_id = u.id
+    LEFT JOIN 
+        club_members cm ON c.id = cm.club_id
+    LEFT JOIN 
+        posts p ON c.id = p.club_id
+    LEFT JOIN 
+        posts_status ps ON p.post_status_id = ps.id
+    WHERE 
+        c.user_admin_id = $1
+    GROUP BY 
+        c.id, c.club_name, c.club_description, u.first_name, u.last_name, u.email
+    ORDER BY 
+        c.club_name;
+  `;
+
+  const { rows } = await pool.query(query, [adminId]);
+  return rows;
+}
+
+async function deleteClubById(clubId) {
+  const query = `
+    DELETE FROM clubs WHERE id = $1
+  `;
+
+  const { rows } = await pool.query(query, [clubId]);
+  return rows;
 }
 
 module.exports = {
@@ -99,5 +142,7 @@ module.exports = {
   insertClubMember,
   getClubs,
   deleteClubMember,
-  userHasClub
+  userHasClub,
+  getClubsInfoByAdminId,
+  deleteClubById,
 };
