@@ -40,14 +40,14 @@ app.use((req, res, next) => {
   next(new HttpError('Resource not found', 404));
 })
 
-app.use((err, req, res, next) => {
-  //Error is not a httpError that is its a runtime error
-  if (!err.httpCode) {
-    err = new HttpError('Internal server error', 500);
-  }
+// app.use((err, req, res, next) => {
+//   //Error is not a httpError that is its a runtime error
+//   if (!err.httpCode) {
+//     err = new HttpError('Internal server error', 500);
+//   }
 
-  res.render('error', { message: err.message, errorCode: err.httpCode });
-});
+//   res.render('error', { message: err.message, errorCode: err.httpCode });
+// });
 
 const PORT = process.env.PORT || 3000;
 

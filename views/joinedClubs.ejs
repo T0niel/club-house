@@ -33,10 +33,12 @@
     <div class="flex">
       <%- include('partials/userDashboard.ejs') %>
       <div class="flex flex-col flex-1 mt-10 gap-4 items-center min-h-[100vh]">
-        <div class="flex gap-2 w-[90%] flex-wrap justify-center md:justify-normal">
+        <div
+          class="flex gap-2 w-[90%] flex-wrap justify-center md:justify-normal"
+        >
           <% locals.clubs.forEach(club => { %>
           <div
-            class="relative block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow flex-1 min-w-[320px]"
+            class="relative block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow flex-1 min-w-[320px] flex flex-col justify-between"
           >
             <% if (!club.is_admin) { %>
             <div class="absolute top-3 right-3 cursor-pointer">
@@ -92,17 +94,20 @@
             <% if(club.is_admin){%>
             <p class="text-teal-500 text-sm mt-2">You own this</p>
             <%} %>
-            <a href="/posts/<%=club.club_name%>">
-              <button
-                class="relative inline-flex items-center justify-center mt-5 p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white focus:ring-4 focus:outline-none focus:ring-green-200"
-              >
-                <span
-                  class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+
+            <div class="mt-auto">
+              <a href="/posts/<%=club.club_name%>">
+                <button
+                  class="inline-flex mt-5 items-center justify-center relative p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white focus:ring-4 focus:outline-none focus:ring-green-200"
                 >
-                  Go to club
-                </span>
-              </button>
-            </a>
+                  <span
+                    class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+                  >
+                    Go to club
+                  </span>
+                </button>
+              </a>
+            </div>
           </div>
           <% }) %>
         </div>

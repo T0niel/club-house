@@ -136,6 +136,14 @@ async function getLeaveClub(req, res, next) {
       throw new HttpError('No such club', 404);
     }
 
+    const club = await getClubByName(name);
+    const isAdmin = Number(club.user_admin_id) === Number(req.user.id);
+
+    if (isAdmin) {
+      next(new HttpError('You cannot leave your own club', 403));
+      return;
+    }
+
     res.render('leaveClub', { club: { name } });
   } catch (error) {
     next(error);
@@ -165,6 +173,13 @@ async function leaveClub(req, res, next) {
     }
 
     const club = await getClubByName(name);
+    const isAdmin = Number(club.user_admin_id) === Number(req.user.id);
+
+    if (isAdmin) {
+      next(new HttpError('You cannot leave your own club', 403));
+      return;
+    }
+
     await deleteClubMember(club.id, req.user.id);
     res.redirect('/');
   } catch (error) {
