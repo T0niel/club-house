@@ -13,47 +13,57 @@ const {
 const moment = require('moment');
 const HttpError = require('../errors/httpError');
 
-async function getPostsPage(req, res) {
-  const { club } = req.params;
+async function getPostsPage(req, res, next) {
+  try {
+    const { club } = req.params;
 
-  const clubData = await getClubByName(club);
-  const posts = await getAllPostsAndUsers(clubData.id);
-  res.render('posts', {
-    club: {
-      ...clubData,
-      is_admin: Number(clubData.user_admin_id) === Number(req.user.id),
-    },
-    posts: posts.map((post) => ({
-      ...post,
-      formatedDate: moment(post.creation_date).format('MM/DD/YYYY hh:mma'),
-      self: post.user_id === req.user.id,
-    })),
-  });
+    const clubData = await getClubByName(club);
+    const posts = await getAllPostsAndUsers(clubData.id);
+    res.render('posts', {
+      club: {
+        ...clubData,
+        is_admin: Number(clubData.user_admin_id) === Number(req.user.id),
+      },
+      posts: posts.map((post) => ({
+        ...post,
+        formatedDate: moment(post.creation_date).format('MM/DD/YYYY hh:mma'),
+        self: post.user_id === req.user.id,
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function userAuthToViewPosts(req, res, next) {
-  const { club } = req.params;
-  const userId = req.user.id;
-  const exists = await clubExists(club);
-  if (!exists) {
-    return next(new HttpError('You do not belong on this club', 401));
-  }
+  try {
+    const { club } = req.params;
+    const userId = req.user.id;
+    const exists = await clubExists(club);
+    if (!exists) {
+      throw new HttpError('You do not belong to this club', 401);
+    }
 
-  const hasClub = await userHasClub(club, userId);
-  if (!hasClub) {
-    return next(new HttpError('You do not belong on this club', 401));
-  }
+    const hasClub = await userHasClub(club, userId);
+    if (!hasClub) {
+      throw new HttpError('You do not belong to this club', 401);
+    }
 
-  return next();
+    next();
+  } catch (error) {
+    next(error);
+  }
 }
 
-//create logic
+async function getCreatePostPage(req, res, next) {
+  try {
+    const { club } = req.params;
 
-async function getCreatePostPage(req, res) {
-  const { club } = req.params;
-
-  const clubData = await getClubByName(club);
-  res.render('createPost', { club: clubData });
+    const clubData = await getClubByName(club);
+    res.render('createPost', { club: clubData });
+  } catch (error) {
+    next(error);
+  }
 }
 
 const createPostSchema = [
@@ -69,41 +79,47 @@ const createPostSchema = [
     .withMessage('Description should be between 3 and 250 characters'),
 ];
 
-async function createPost(req, res) {
-  const { club } = req.params;
-  const clubData = await getClubByName(club);
+async function createPost(req, res, next) {
+  try {
+    const { club } = req.params;
+    const clubData = await getClubByName(club);
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.render('createPost', { errors: errors.array(), club: clubData });
-    return;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.render('createPost', { errors: errors.array(), club: clubData });
+      return;
+    }
+
+    const { title, description } = req.body;
+    const now = new Date();
+
+    await insertPost(title, description, now, req.user.id, clubData.id);
+
+    res.redirect(`/posts/${club}`);
+  } catch (error) {
+    next(error);
   }
-
-  const { title, description } = req.body;
-  const now = new Date();
-
-  await insertPost(title, description, now, req.user.id, clubData.id);
-
-  res.redirect(`/posts/${club}`);
 }
 
 async function deletePost(req, res, next) {
-  const user = req.user;
-  const { id } = req.query;
-  const { club } = req.params;
-  const clubData = await getClubByName(club);
+  try {
+    const user = req.user;
+    const { id } = req.query;
+    const { club } = req.params;
 
-  const isClubAdmin = Number(clubData.user_admin_id) === Number(req.user.id);
+    const clubData = await getClubByName(club);
+    const isClubAdmin = Number(clubData.user_admin_id) === Number(req.user.id);
 
-  const hasPost = await userHasPost(user.id, id);
-  if (!hasPost && !isClubAdmin) {
-    next(new HttpError('User not authorize to modify post', 401));
-    return;
+    const hasPost = await userHasPost(user.id, id);
+    if (!hasPost && !isClubAdmin) {
+      throw new HttpError('User not authorized to modify post', 401);
+    }
+
+    await setPostStatusToDeleted(id);
+    res.redirect(`/posts/${club}`);
+  } catch (error) {
+    next(error);
   }
-
-
-  await setPostStatusToDeleted(id);
-  res.redirect(`/posts/${club}`);
 }
 
 module.exports = {
