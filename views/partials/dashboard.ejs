@@ -1,0 +1,7 @@
+<%
+    if(locals.isAdminUser){%>
+      <%-include('./adminDashboard.ejs')%>
+    <%}else{%>
+      <%-include('./userDashboard.ejs')%>
+    <%}
+%>

@@ -1,6 +1,6 @@
 <aside
   id="default-sidebar"
-  class="z-40 w-64 transition-transform hidden lg:block lg:translate-x-0"
+  class="z-40 w-64 transition-transform hidden lg:block min-w-64"
   aria-label="Sidebar"
 >
   <div
@@ -46,7 +46,32 @@
           <span class="ms-3">Joined Clubs</span>
         </a>
       </li>
-
+      <li>
+        <a
+          href="/admin/manage-users"
+          class="flex items-center p-2 text-gray-700 rounded-lg hover:text-gray-900 hover:bg-slate-200 group"
+        >
+          <img
+            src="/images/icons/manage-users.svg"
+            alt="Logout Icon"
+            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"
+          />
+          <span class="ms-3">Manage Users</span>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/admin/manage-clubs"
+          class="flex items-center p-2 text-gray-700 rounded-lg hover:text-gray-900 hover:bg-slate-200 group"
+        >
+          <img
+            src="/images/icons/manage-clubs.svg"
+            alt="Logout Icon"
+            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"
+          />
+          <span class="ms-3">Manage Clubs</span>
+        </a>
+      </li>
       <li>
         <a
           href="/logout"
