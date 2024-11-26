@@ -38,10 +38,6 @@ async function getClubByName(name) {
   return rows[0];
 }
 
-async function clubExists(name) {
-  return !!(await getClubByName(name));
-}
-
 async function insertClubMember(clubId, userId) {
   const query = `
         INSERT INTO 
@@ -126,6 +122,38 @@ async function getClubsInfoByAdminId(adminId) {
   return rows;
 }
 
+async function getAllClubsInfo() {
+  const query = `
+    SELECT
+          c.id AS club_id,
+          c.club_name,
+          c.club_description,
+          CONCAT(u.first_name, ' ', u.last_name) AS admin_name,
+          u.email AS admin_email,
+          COUNT(DISTINCT cm.user_id) AS total_members,
+          COUNT(DISTINCT p.id) AS total_posts,
+          SUM(CASE WHEN ps.status = 'Active' THEN 1 ELSE 0 END) AS active_posts,
+          SUM(CASE WHEN ps.status = 'Deleted' THEN 1 ELSE 0 END) AS deleted_posts
+    FROM 
+        clubs c
+    LEFT JOIN 
+        users u ON c.user_admin_id = u.id
+    LEFT JOIN 
+        club_members cm ON c.id = cm.club_id
+    LEFT JOIN 
+        posts p ON c.id = p.club_id
+    LEFT JOIN 
+        posts_status ps ON p.post_status_id = ps.id
+    GROUP BY 
+        c.id, c.club_name, c.club_description, u.first_name, u.last_name, u.email
+    ORDER BY 
+        c.club_name
+  `;
+
+  const { rows } = await pool.query(query);
+  return rows;
+}
+
 async function deleteClubById(clubId) {
   const query = `
     DELETE FROM clubs WHERE id = $1
@@ -137,7 +165,6 @@ async function deleteClubById(clubId) {
 
 module.exports = {
   insertClub,
-  clubExists,
   getClubByName,
   insertClubMember,
   getClubs,
@@ -145,4 +172,5 @@ module.exports = {
   userHasClub,
   getClubsInfoByAdminId,
   deleteClubById,
+  getAllClubsInfo
 };

@@ -48,7 +48,7 @@
           <div
             class="relative max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow flex-1 min-w-[320px] flex flex-col justify-between"
           >
-            <% if (!club.is_admin) { %>
+            <% if (!club.is_owner) { %>
             <div class="absolute top-3 right-3 cursor-pointer">
               <svg
                 onclick="toggleDropdown(event)"
@@ -99,7 +99,7 @@
             >
               <%= club.club_description %>
             </p>
-            <% if(club.is_admin){%>
+            <% if(club.is_owner){%>
             <p class="text-teal-500 text-sm mt-2">You own this</p>
             <%} %>
 

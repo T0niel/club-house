@@ -2,20 +2,20 @@ const { body, validationResult } = require('express-validator');
 const util = require('util');
 const bcrypt = require('bcryptjs');
 const {
-getClubsInfoByAdminId,
+  getClubsInfoByAdminId,
   getClubByName,
-  clubExists,
   deleteClubById,
 } = require('../db/queries/clubQueries');
+const HttpError = require('../errors/httpError');
 
 const compareAsync = util.promisify(bcrypt.compare);
 
 async function getOwnedClubsPage(req, res) {
   const clubs = await getClubsInfoByAdminId(req.user.id);
-  res.render('ownedClubs', { clubs });
+  res.render('clubs', { clubs, header: 'Owned clubs' });
 }
 
-async function getDeleteClubPage(req, res) {
+async function getDeleteClubPage(req, res, next) {
   try {
     const { name } = req.params;
 
@@ -25,9 +25,10 @@ async function getDeleteClubPage(req, res) {
     }
 
     const club = await getClubByName(name);
-    const isAdmin = Number(club.user_admin_id) === Number(req.user.id);
+    const isOwner = Number(club.user_admin_id) === Number(req.user.id);
+    const isAdmin = req.user.user_role_id == 1;
 
-    if (!isAdmin) {
+    if (!isOwner && !isAdmin) {
       next(new HttpError('Unauthorized', 401));
       return;
     }
@@ -44,35 +45,41 @@ const deleteClubSchema = [
 ];
 
 async function deleteClub(req, res, next) {
- try {
-   const { name, password } = req.body;
-   const errors = validationResult(req);
-   if (!errors.isEmpty()) {
-     res.locals.errors = errors.array();
-     res.render('deleteClub', { club: { name } });
-     return;
-   }
+  try {
+    const { name, password } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.locals.errors = errors.array();
+      res.render('deleteClub', { club: { name } });
+      return;
+    }
 
-   const match = await compareAsync(password, req.user.password);
-   if (!match) {
-     res.locals.errors = [{ msg: 'Incorrect password' }];
-     res.render('deleteClub', { club: { name } });
-     return;
-   }
+    const match = await compareAsync(password, req.user.password);
+    if (!match) {
+      res.locals.errors = [{ msg: 'Incorrect password' }];
+      res.render('deleteClub', { club: { name } });
+      return;
+    }
 
-   const club = await getClubByName(name);
-   const isAdmin = Number(club.user_admin_id) === Number(req.user.id);
+    const club = await getClubByName(name);
+    const isOwner = Number(club.user_admin_id) === Number(req.user.id);
+    const isAdmin = req.user.user_role_id == 1;
 
-   if (!isAdmin) {
-     next(new HttpError('Unauthroized', 401));
-     return;
-   }
+    if (!isOwner && !isAdmin) {
+      next(new HttpError('Unauthroized', 401));
+      return;
+    }
 
-   await deleteClubById(club.id);
-   res.redirect('/');
- } catch (error) {
-   next(error);
- }
+    await deleteClubById(club.id);
+    res.redirect('/');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function clubExists(name) {
+  const club = await getClubByName(name.trim());
+  return !!club;
 }
 
 module.exports = {

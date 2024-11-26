@@ -22,7 +22,7 @@ async function getPostsPage(req, res, next) {
     res.render('posts', {
       club: {
         ...clubData,
-        is_admin: Number(clubData.user_admin_id) === Number(req.user.id),
+        is_owner: Number(clubData.user_admin_id) === Number(req.user.id),
       },
       posts: posts.map((post) => ({
         ...post,

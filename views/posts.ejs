@@ -58,7 +58,7 @@
                 </button>
               </a>
               <div class="flex-1 relative">
-                <%if(!locals.club.is_admin){%>
+                <%if(!locals.club.is_owner){%>
                 <div class="absolute top-3 right-3 cursor-pointer">
                   <svg
                     onclick="toggleDropdown(event)"
@@ -116,7 +116,7 @@
           <div
             class="relative max-w-xl <%=(self ? 'ml-auto' : '')%> mb-4 p-4 bg-gray-100 border-teal-500 border-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
-            <% if((self || locals.club.is_admin) && status.toLowerCase() === 'active'){%>
+            <% if((self || locals.club.is_owner) && status.toLowerCase() === 'active'){%>
             <div class="absolute top-3 right-3 cursor-pointer">
               <svg
                 onclick="toggleDropdown(event)"

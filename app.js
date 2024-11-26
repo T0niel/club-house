@@ -3,12 +3,14 @@ const express = require('express');
 const indexRouter = require('./routes/indexRouter');
 const clubRouter = require('./routes/clubRouter');
 const postRouter = require('./routes/postRouter');
+const adminRouter = require('./routes/adminRouter');
 const path = require('path');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const pool = require('./db/pool');
 const passport = require('passport');
 const HttpError = require('./errors/httpError');
+const isAuth = require('./middlewares/isAuth');
 const app = express();
 
 app.use(
@@ -31,8 +33,12 @@ app.use(express.static('public'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use('/', (req, res, next) => {
+app.use((req, res, next) => {
   const user = req.user;
+  if(!user){
+    next();
+    return;
+  }
   if (user.user_role_id == 1) {
     res.locals.isAdminUser = true;
     next();
@@ -44,8 +50,10 @@ app.use('/', (req, res, next) => {
 });
 
 app.use('/', indexRouter);
+
 app.use('/clubs', clubRouter);
 app.use('/posts', postRouter);
+app.use('/admin', adminRouter);
 
 //Catch all route
 app.use((req, res, next) => {
