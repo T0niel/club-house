@@ -7,6 +7,7 @@ const {
   deleteClubById,
 } = require('../db/queries/clubQueries');
 const HttpError = require('../errors/httpError');
+const clubExists = require('../utils/clubExists');
 
 const compareAsync = util.promisify(bcrypt.compare);
 
@@ -75,11 +76,6 @@ async function deleteClub(req, res, next) {
   } catch (error) {
     next(error);
   }
-}
-
-async function clubExists(name) {
-  const club = await getClubByName(name.trim());
-  return !!club;
 }
 
 module.exports = {

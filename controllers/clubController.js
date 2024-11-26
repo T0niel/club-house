@@ -10,6 +10,7 @@ const {
 const bcrypt = require('bcryptjs');
 const util = require('util');
 const HttpError = require('../errors/httpError');
+const clubExists = require('../utils/clubExists');
 const hashAsync = util.promisify(bcrypt.hash);
 const compareAsync = util.promisify(bcrypt.compare);
 
@@ -195,11 +196,6 @@ async function leaveClub(req, res, next) {
   } catch (error) {
     next(error);
   }
-}
-
-async function clubExists(name) {
-  const club = await getClubByName(name.trim());
-  return !!club;
 }
 
 module.exports = {
