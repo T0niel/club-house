@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/output.css" />
+    <title>Home</title>
+  </head>
+  <body class="bg-gray-200 min-h-[100vh]">
+    <!-- button to display dashboard in mobile -->
+    <button
+      aria-controls="sidebar-multi-level-sidebar"
+      type="button"
+      onclick="toggleSidebar()"
+      class="block p-2 w-full lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+    >
+      <span class="sr-only">Open sidebar</span>
+      <svg
+        class="w-6 h-6"
+        aria-hidden="true"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          clip-rule="evenodd"
+          fill-rule="evenodd"
+          d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+        ></path>
+      </svg>
+    </button>
+
+    <div class="flex">
+      <%-include('partials/dashboard.ejs')%>
+
+      <div class="mx-5 min-h-[100vh] flex flex-col flex-1 overflow-auto">
+        <div class="mt-8">
+          <%if(locals.users.length === 0){%>
+          <h1 class="text-2xl font-bold mb-4 text-center">
+            No users have been created
+          </h1>
+          <%}else{%>
+          <h1 class="text-2xl font-bold mb-4 mx-auto"><%=locals.header%></h1>
+          <div class="w-[max-content] mx-auto shadow-md sm:rounded-lg">
+            <table class="text-sm text-left text-gray-500">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3">Email</th>
+                  <th scope="col" class="px-6 py-3">First Name</th>
+                  <th scope="col" class="px-6 py-3">Last Name</th>
+                  <th scope="col" class="px-6 py-3">Clubs Joined</th>
+                  <th scope="col" class="px-6 py-3">Clubs Created</th>
+                  <th scope="col" class="px-6 py-3">Posts Created</th>
+                  <th scope="col" class="px-6 py-3">Admin</th>
+                  <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach(user => { %>
+                <tr class="bg-white border-b hover:bg-gray-50">
+                  <td class="px-6 py-4 font-medium text-gray-900">
+                    <%= user.email %>
+                  </td>
+                  <td class="px-6 py-4"><%= user.first_name %></td>
+                  <td class="px-6 py-4"><%= user.last_name %></td>
+                  <td class="px-6 py-4"><%= user.clubs_joined %></td>
+                  <td class="px-6 py-4"><%= user.clubs_created %></td>
+                  <td class="px-6 py-4"><%= user.posts_created %></td>
+                  <td
+                    class="px-6 py-4 <%=user.is_admin ? 'text-green-500' : ''%>"
+                  >
+                    <%= user.is_admin %>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <% if(!user.is_admin){%>
+                    <form
+                      id="user_id<%=user.id%>"
+                      action="/admin/manage-users/change-status"
+                      method="post"
+                    >
+                      <input type="number" name="id" value="<%=user.id%>" class="hidden" />
+                      <select
+                        id="status"
+                        data-user-id="<%=user.id%>"
+                        name="status"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      >
+                        <option <%= user.user_status.toLowerCase() === 'active' ? 'selected' : '' %> value="Active">Active</option>
+                        <option <%= user.user_status.toLowerCase() === 'banned' ? 'selected' : '' %> value="Banned">Banned</option>
+                      </select>
+                    </form>
+                    <%}else{%> None <%} %>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <%}%>
+        </div>
+      </div>
+    </div>
+    <script>
+      function toggleSidebar() {
+        const side = document.getElementById('default-sidebar');
+        side.style.display = side.style.display === 'block' ? 'none' : 'block';
+      }
+
+      const statusSelect = document.querySelectorAll('#status');
+      statusSelect.forEach((status) => {
+        status.onchange = (e) => {
+          const target = e.target;
+          const userId = target.getAttribute('data-user-id');
+          const form = document.querySelector(`form#user_id${userId}`);
+          form.submit();
+        };
+      });
+    </script>
+  </body>
+</html>

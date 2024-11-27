@@ -108,7 +108,7 @@ const signUpFormSchema = [
 //Login logic starts here
 
 const postLogin = (req, res, next) => {
-  passport.authenticate('local', (err, user) => {
+  passport.authenticate('local', (err, user, options) => {
     if (err) {
       res.render('login', {
         errors: [{ msg: 'An error happened while login you in' }],
@@ -117,7 +117,7 @@ const postLogin = (req, res, next) => {
     }
 
     if (!user) {
-      res.render('login', { errors: [{ msg: 'Incorrect email or password' }] });
+      res.render('login', { errors: [{ msg: options.message }] });
       return;
     }
 
@@ -145,13 +145,18 @@ passport.use(
         const user = await findUser(email);
 
         if (!user) {
-          done(false, null);
+          done(false, null, {message: 'Incorrect email or password'});
+          return;
+        }
+
+        if(user.user_status_id == 2){
+          done(false, null, {message: 'User banned'});
           return;
         }
 
         const match = await compareAsync(password, user.password);
         if (!match) {
-          done(false, null);
+          done(false, null, { message: 'Incorrect email or password' });
           return;
         }
 
