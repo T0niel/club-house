@@ -1,3 +1,13 @@
+# LIVE AT RENDER (YOU ARE GOING TO WAIT 50 SECONDS FOR THE PROJECT TO LOAD IM USING A FREE PLAN BECAUSE IM POOR)
+## https://club-house-07bi.onrender.com
+
+## Project overview
+Club house project is a project where users can create clubs (like groups) where other users can join
+and they can together post content where only members of that club can view, the owner of that club
+can delete the posts, and the users can leave the club if they want to.
+
+I've also implemented a admin which will be able to view the clubs and the users and ban the users.
+
 # Run localy
 
 ## Requirements
