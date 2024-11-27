@@ -1,7 +1,6 @@
 const { body, validationResult } = require('express-validator');
 const {
   insertUser,
-  userExists,
   findUser,
   findUserById,
 } = require('../db/queries/userQueries');
@@ -33,7 +32,7 @@ const postSignUpPage = [
 
       const { first_name, last_name, email, password } = req.body;
 
-      const exists = await userExists(email);
+      const exists = await findUser(email);
       if (exists) {
         res.render('signup', {
           errors: [{ msg: 'User with this email exists' }],

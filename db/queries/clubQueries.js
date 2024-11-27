@@ -90,32 +90,53 @@ async function userHasClub(name, userId) {
 
 async function getClubsInfoByAdminId(adminId) {
   const query = `
+    WITH member_count AS (
+      SELECT
+        cm.club_id,
+        COUNT(DISTINCT cm.user_id) AS total_members
+      FROM
+        club_members cm
+      GROUP BY
+        cm.club_id
+    )
     SELECT
-          c.id AS club_id,
-          c.club_name,
-          c.club_description,
-          CONCAT(u.first_name, ' ', u.last_name) AS admin_name,
-          u.email AS admin_email,
-          COUNT(DISTINCT cm.user_id) AS total_members,
-          COUNT(DISTINCT p.id) AS total_posts,
-          SUM(CASE WHEN ps.status = 'Active' THEN 1 ELSE 0 END) AS active_posts,
-          SUM(CASE WHEN ps.status = 'Deleted' THEN 1 ELSE 0 END) AS deleted_posts
-    FROM 
-        clubs c
-    LEFT JOIN 
-        users u ON c.user_admin_id = u.id
-    LEFT JOIN 
-        club_members cm ON c.id = cm.club_id
-    LEFT JOIN 
-        posts p ON c.id = p.club_id
-    LEFT JOIN 
-        posts_status ps ON p.post_status_id = ps.id
-    WHERE 
-        c.user_admin_id = $1
-    GROUP BY 
-        c.id, c.club_name, c.club_description, u.first_name, u.last_name, u.email
-    ORDER BY 
-        c.club_name;
+      c.id AS club_id,
+      c.club_name,
+      c.club_description,
+      CONCAT(u.first_name, ' ', u.last_name) AS admin_name,
+      u.email AS admin_email,
+      mc.total_members,
+      COUNT(DISTINCT p.id) AS total_posts,
+      SUM(
+        CASE
+          WHEN ps.status ILIKE 'Active' THEN 1
+          ELSE 0
+        END
+      ) AS active_posts,
+      SUM(
+        CASE
+          WHEN ps.status ILIKE 'Deleted' THEN 1
+          ELSE 0
+        END
+      ) AS deleted_posts
+    FROM
+      clubs c
+      LEFT JOIN users u ON c.user_admin_id = u.id
+      LEFT JOIN posts p ON c.id = p.club_id
+      LEFT JOIN posts_status ps ON p.post_status_id = ps.id
+      LEFT JOIN member_count mc ON c.id = mc.club_id
+    WHERE
+      c.user_admin_id = $1
+    GROUP BY
+      c.id,
+      c.club_name,
+      c.club_description,
+      u.first_name,
+      u.last_name,
+      u.email,
+      mc.total_members
+    ORDER BY
+      c.club_name;
   `;
 
   const { rows } = await pool.query(query, [adminId]);
@@ -124,30 +145,51 @@ async function getClubsInfoByAdminId(adminId) {
 
 async function getAllClubsInfo() {
   const query = `
+    WITH member_count AS (
+      SELECT
+        cm.club_id,
+        COUNT(DISTINCT cm.user_id) AS total_members
+      FROM
+        club_members cm
+      GROUP BY
+        cm.club_id
+    )
     SELECT
-          c.id AS club_id,
-          c.club_name,
-          c.club_description,
-          CONCAT(u.first_name, ' ', u.last_name) AS admin_name,
-          u.email AS admin_email,
-          COUNT(DISTINCT cm.user_id) AS total_members,
-          COUNT(DISTINCT p.id) AS total_posts,
-          SUM(CASE WHEN ps.status = 'Active' THEN 1 ELSE 0 END) AS active_posts,
-          SUM(CASE WHEN ps.status = 'Deleted' THEN 1 ELSE 0 END) AS deleted_posts
-    FROM 
-        clubs c
-    LEFT JOIN 
-        users u ON c.user_admin_id = u.id
-    LEFT JOIN 
-        club_members cm ON c.id = cm.club_id
-    LEFT JOIN 
-        posts p ON c.id = p.club_id
-    LEFT JOIN 
-        posts_status ps ON p.post_status_id = ps.id
-    GROUP BY 
-        c.id, c.club_name, c.club_description, u.first_name, u.last_name, u.email
-    ORDER BY 
-        c.club_name
+      c.id AS club_id,
+      c.club_name,
+      c.club_description,
+      CONCAT(u.first_name, ' ', u.last_name) AS admin_name,
+      u.email AS admin_email,
+      mc.total_members,
+      COUNT(DISTINCT p.id) AS total_posts,
+      SUM(
+        CASE
+          WHEN ps.status ILIKE 'Active' THEN 1
+          ELSE 0
+        END
+      ) AS active_posts,
+      SUM(
+        CASE
+          WHEN ps.status ILIKE 'Deleted' THEN 1
+          ELSE 0
+        END
+      ) AS deleted_posts
+    FROM
+      clubs c
+      LEFT JOIN users u ON c.user_admin_id = u.id
+      LEFT JOIN posts p ON c.id = p.club_id
+      LEFT JOIN posts_status ps ON p.post_status_id = ps.id
+      LEFT JOIN member_count mc ON c.id = mc.club_id
+    GROUP BY
+      c.id,
+      c.club_name,
+      c.club_description,
+      u.first_name,
+      u.last_name,
+      u.email,
+      mc.total_members
+    ORDER BY
+      c.club_name;
   `;
 
   const { rows } = await pool.query(query);
@@ -172,5 +214,5 @@ module.exports = {
   userHasClub,
   getClubsInfoByAdminId,
   deleteClubById,
-  getAllClubsInfo
+  getAllClubsInfo,
 };

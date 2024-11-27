@@ -24,13 +24,6 @@ async function insertUser(firstName, lastName, email, password, userRole) {
   return rows[0];
 }
 
-async function userExists(email) {
-  const query = `SELECT * FROM users WHERE email = $1`;
-
-  const { rows } = await pool.query(query, [email]);
-  return rows.length >= 1;
-}
-
 async function findUser(email) {
   const query = 'SELECT * FROM users WHERE email = $1';
 
@@ -106,7 +99,6 @@ async function updateUserStatus(userId, statusId) {
 
 module.exports = {
   insertUser,
-  userExists,
   findUser,
   findUserById,
   getAllUsersInfo,
