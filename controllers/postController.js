@@ -1,7 +1,6 @@
 const { body, validationResult } = require('express-validator');
 const {
   getClubByName,
-  clubExists,
   userHasClub,
 } = require('../db/queries/clubQueries');
 const {
@@ -12,6 +11,7 @@ const {
 } = require('../db/queries/postsQueries');
 const moment = require('moment');
 const HttpError = require('../errors/httpError');
+const clubExists = require('../utils/clubExists');
 
 async function getPostsPage(req, res, next) {
   try {
@@ -22,7 +22,7 @@ async function getPostsPage(req, res, next) {
     res.render('posts', {
       club: {
         ...clubData,
-        is_admin: Number(clubData.user_admin_id) === Number(req.user.id),
+        is_owner: Number(clubData.user_admin_id) === Number(req.user.id),
       },
       posts: posts.map((post) => ({
         ...post,

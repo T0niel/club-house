@@ -34,7 +34,7 @@
     </button>
 
     <div class="flex">
-      <%-include('partials/userDashboard.ejs')%>
+      <%-include('partials/dashboard.ejs')%>
 
       <div
         class="min-h-[100vh] flex flex-col justify-center items-center flex-1"
@@ -42,7 +42,7 @@
         <p class="text-3xl font-medium">
           Welcome
           <span class="animate-slide-bottom inline-block"
-            ><%=`${user.first_name} ${user.last_name}`%>!</span
+            ><%=(!locals.isAdminUser ? `${user.first_name} ${user.last_name}` : 'Admin')%>!</span
           >
         </p>
         <div class="flex gap-2 mt-4">

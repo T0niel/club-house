@@ -1,15 +1,16 @@
 const { body, validationResult } = require('express-validator');
 const {
   insertClub,
-  clubExists,
   getClubByName,
   insertClubMember,
   getClubs,
   deleteClubMember,
+  userHasClub,
 } = require('../db/queries/clubQueries');
 const bcrypt = require('bcryptjs');
 const util = require('util');
 const HttpError = require('../errors/httpError');
+const clubExists = require('../utils/clubExists');
 const hashAsync = util.promisify(bcrypt.hash);
 const compareAsync = util.promisify(bcrypt.compare);
 
@@ -22,7 +23,9 @@ const createClubSchema = [
     .notEmpty()
     .withMessage('Club name is required')
     .isLength({ min: 3, max: 10 })
-    .withMessage('Club name must be between 3 at 10 characters'),
+    .withMessage('Club name must be between 3 and 10 characters')
+    .matches(/^\S*$/)
+    .withMessage('Club name cannot contain spaces'),
   body('description')
     .optional({ values: 'falsy' })
     .trim()
@@ -82,21 +85,28 @@ function getJoinClub(req, res) {
 async function joinClub(req, res, next) {
   try {
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       res.locals.errors = errors.array();
       res.render('homepage', { user: req.user, showClubModal: true });
       return;
     }
 
-    const { name, password } = req.body;
-    const exists = await clubExists(name);
+    const { name: clubName, password } = req.body;
+    const exists = await clubExists(clubName);
     if (!exists) {
       res.locals.errors = [{ msg: 'No club with this name exists' }];
       res.render('homepage', { user: req.user, showClubModal: true });
       return;
     }
 
-    const club = await getClubByName(name);
+    const club = await getClubByName(clubName);
+    const hasJoined = await userHasClub(clubName, req.user.id);
+    if (hasJoined) {
+      res.locals.errors = [{ msg: 'You have already joined this club' }];
+      res.render('homepage', { user: req.user, showClubModal: true });
+      return;
+    }
 
     const match = await compareAsync(password, club.join_password);
     if (!match) {
@@ -106,6 +116,7 @@ async function joinClub(req, res, next) {
     }
 
     await insertClubMember(club.id, req.user.id);
+    console.log('Redirecting...')
     res.redirect('/');
   } catch (error) {
     next(error);
@@ -119,7 +130,7 @@ async function getJoinedClubs(req, res, next) {
     res.render('joinedClubs', {
       clubs: clubs.map((club) => ({
         ...club,
-        is_admin: Number(club.user_admin_id) === Number(id),
+        is_owner: Number(club.user_admin_id) === Number(id),
       })),
     });
   } catch (error) {
@@ -129,22 +140,22 @@ async function getJoinedClubs(req, res, next) {
 
 async function getLeaveClub(req, res, next) {
   try {
-    const { name } = req.params;
+    const { name: clubName } = req.params;
 
-    const exists = await clubExists(name);
+    const exists = await clubExists(clubName);
     if (!exists) {
       throw new HttpError('No such club', 404);
     }
 
-    const club = await getClubByName(name);
-    const isAdmin = Number(club.user_admin_id) === Number(req.user.id);
+    const club = await getClubByName(clubName);
+    const isOwner = Number(club.user_admin_id) === Number(req.user.id);
 
-    if (isAdmin) {
+    if (isOwner) {
       next(new HttpError('You cannot leave your own club', 403));
       return;
     }
 
-    res.render('leaveClub', { club: { name } });
+    res.render('leaveClub', { club: { name: clubName } });
   } catch (error) {
     next(error);
   }
@@ -157,25 +168,25 @@ const leaveClubSchema = [
 
 async function leaveClub(req, res, next) {
   try {
-    const { name, password } = req.body;
+    const { name: clubName, password } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.locals.errors = errors.array();
-      res.render('leaveClub', { club: { name } });
+      res.render('leaveClub', { club: { name: clubName } });
       return;
     }
 
     const match = await compareAsync(password, req.user.password);
     if (!match) {
       res.locals.errors = [{ msg: 'Incorrect password' }];
-      res.render('leaveClub', { club: { name } });
+      res.render('leaveClub', { club: { name: clubName } });
       return;
     }
 
-    const club = await getClubByName(name);
-    const isAdmin = Number(club.user_admin_id) === Number(req.user.id);
+    const club = await getClubByName(clubName);
+    const isOwner = Number(club.user_admin_id) === Number(req.user.id);
 
-    if (isAdmin) {
+    if (isOwner) {
       next(new HttpError('You cannot leave your own club', 403));
       return;
     }

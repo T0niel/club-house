@@ -31,7 +31,7 @@
     </button>
 
     <div class="flex">
-      <%- include('partials/userDashboard.ejs') %>
+      <%-include('partials/dashboard.ejs')%>
       <div class="flex flex-col flex-1 mt-10 gap-4 items-center min-h-[100vh]">
         <% if(locals.clubs.length === 0){%>
         <div class="text-center">
@@ -48,7 +48,7 @@
           <div
             class="relative max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow flex-1 min-w-[320px] flex flex-col justify-between"
           >
-            <% if (!club.is_admin) { %>
+            <% if (!club.is_owner) { %>
             <div class="absolute top-3 right-3 cursor-pointer">
               <svg
                 onclick="toggleDropdown(event)"
@@ -99,7 +99,7 @@
             >
               <%= club.club_description %>
             </p>
-            <% if(club.is_admin){%>
+            <% if(club.is_owner){%>
             <p class="text-teal-500 text-sm mt-2">You own this</p>
             <%} %>
 
